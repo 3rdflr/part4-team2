@@ -92,10 +92,12 @@ axiosInstance.interceptors.request.use(
           console.error('알 수 없는 오류가 발생했습니다.');
         }
 
-        // Refresh Token 만료 시 accessToken 삭제 + 페이지이동(추가예정...)
+        // Refresh Token 만료 시 accessToken 삭제
         localStorage.removeItem('accessToken');
+
+        //  페이지이동(추가예정...)
         // const router = useRouter();
-        // router.push('/login');
+        // router.push('/');
 
         return Promise.reject(refreshError);
       } finally {
