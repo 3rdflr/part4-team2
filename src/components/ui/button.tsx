@@ -44,6 +44,17 @@ const buttonVariants = cva(
  * <Button variant="default" size="sm" onClick={() => alert('클릭!')}>
  *   버튼 테스트
  * </Button>
+ * 
+ * <Button variant='secondary'>
+    <Image
+      src='/icon/icon_kakao.svg'
+      alt='아이콘'
+      width={24}
+      height={24}
+      className='w-6 h-6 object-contain'
+    />
+    아이콘
+  </Button>
  */
 
 function Button({
