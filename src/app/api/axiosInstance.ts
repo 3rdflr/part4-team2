@@ -32,7 +32,7 @@ const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true,
+  // withCredentials: true,
 });
 
 // 요청 인터셉터 : Access Token 헤더 자동 첨부
@@ -48,7 +48,7 @@ axiosInstance.interceptors.request.use(
 );
 
 // 요청 인터셉터 : 401 에러 처리 및 토큰 재발급
-axiosInstance.interceptors.request.use(
+axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
