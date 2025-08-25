@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import ToastProvider from '@/components/common/ToastProvider';
 import { pretendard } from '@/lib/fonts';
 import './globals.css';
+import { OverlayProvider } from '@/components/common/OverlayProvider';
 
 export const metadata: Metadata = {
   title: 'Trivera',
@@ -16,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang='ko' className={`${pretendard.variable}`}>
       <ToastProvider />
-      <body>테스트입니다.{children}</body>
+      <body>
+        <OverlayProvider>{children}</OverlayProvider>
+      </body>
     </html>
   );
 }

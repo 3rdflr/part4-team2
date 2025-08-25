@@ -41,4 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 # storybook
-storybook.log
+*storybook.log
+chromatic.log
+build-storybook.log
+storybook-static

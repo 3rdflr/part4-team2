@@ -51,6 +51,11 @@ const config: Config = {
       boxShadow: {
         card: '0px 4px 24px rgba(0, 0, 0, 0.12)',
       },
+      colors: {
+        grayscale: {
+          950: 'var(--grayscale-950)',
+        },
+      },
     },
   },
   plugins: [],
