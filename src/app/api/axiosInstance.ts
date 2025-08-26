@@ -39,6 +39,14 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
+
+    // 확인용
+    if (token) {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log('만료 시간(exp):', payload.exp); // 유닉스 타임스탬프
+      console.log('현재 시간:', Math.floor(Date.now() / 1000));
+    }
+
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }

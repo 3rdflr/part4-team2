@@ -18,7 +18,7 @@ const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLI
           data-slot='input'
           onInvalid={(e) => e.preventDefault()}
           className={cn(
-            'file:text-foreground placeholder:text-muted-foreground selection:bg-[var(--primary-300)] selection:text-primary-foreground dark:bg-input/30 border-[var(--grayscale-100)] flex w-full min-w-0 rounded-[16px] border bg-transparent px-[20px] py-[17px] text-base transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+            'file:text-foreground placeholder:text-muted-foreground selection:bg-[var(--primary-300)] selection:text-primary-foreground dark:bg-input/30 border-[var(--grayscale-100)] flex w-full min-w-0 rounded-[16px] border bg-transparent px-[20px] py-[17px] text-base transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
 
             'focus-visible:border-[var(--primary-200)] focus-visible:ring-[var(--primary-200)]/30 focus-visible:ring-[3px]',
 
@@ -36,9 +36,14 @@ const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLI
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? (
-              <Image width={24} height={24} alt='비밀번호 표시' src='/icon/active_on.svg' />
+              <Image width={24} height={24} alt='비밀번호 표시' src='/images/icons/active_on.svg' />
             ) : (
-              <Image width={24} height={24} alt='비밀번호 숨김' src='/icon/active_off.svg' />
+              <Image
+                width={24}
+                height={24}
+                alt='비밀번호 숨김'
+                src='/images/icons/active_off.svg'
+              />
             )}
           </button>
         )}

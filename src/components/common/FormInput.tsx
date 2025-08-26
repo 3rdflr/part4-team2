@@ -49,11 +49,9 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           {label}
         </Label>
         <Input type={type} id={id} ref={ref} {...props} />
-        {error && (
-          <small className='text-12-medium ml-2 text-[var(--secondary-red-500)] mt-[6px] leading-[12px]'>
-            {error}
-          </small>
-        )}
+        <small className='text-12-medium ml-2 text-[var(--secondary-red-500)] mt-[6px] leading-[12px] min-h-[20px]'>
+          {error}
+        </small>
       </div>
     );
   },
