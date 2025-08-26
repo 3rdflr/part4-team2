@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import ToastProvider from '@/components/common/ToastProvider';
 
+import QueryProvider from '@/providers/QueryProvider';
+
 import { pretendard } from '@/lib/fonts';
 import './globals.css';
 import { Suspense } from 'react';
@@ -19,18 +21,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='ko' className={`${pretendard.variable}`}>
-      <ToastProvider />
-      <Suspense fallback={<div>Loading...</div>}>
-        <body>
-          <OverlayProvider>
-            <Nav />
-            {children}
-            <div className='fixed bottom-0 left-0 right-0 flex items-center justify-between px-12 py-4 bg-black w-full  h-[82px] zindex-50 text-white'>
-              bottom nav for mobile test
-            </div>
-          </OverlayProvider>
-        </body>
-      </Suspense>
+      <body suppressHydrationWarning={true}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <QueryProvider>
+            <ToastProvider />
+            <OverlayProvider>
+              <Nav />
+              {children}
+              <div className='fixed bottom-0 left-0 right-0 flex items-center justify-between px-12 py-4 bg-black w-full  h-[82px] zindex-50 text-white'>
+                bottom nav for mobile test
+              </div>
+            </OverlayProvider>
+          </QueryProvider>
+        </Suspense>
+      </body>
     </html>
   );
 }
