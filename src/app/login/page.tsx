@@ -3,51 +3,53 @@
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import FormInput from '@/components/common/FormInput';
-import { validations, confirmPassword } from '@/lib/utils/validations';
+import { validations } from '@/lib/utils/validations';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
-import { signup } from '../api/user';
+import { login } from '../api/auth';
 import { AxiosError } from 'axios';
+import axiosInstance from '@/app/api/axiosInstance';
 
 type FormValues = {
   email: string;
   password: string;
-  nickname: string;
-  confirmPassword: string;
-  agree: boolean;
 };
 
-const SignUp = () => {
+const Login = () => {
+  axiosInstance
+    .get('/users/me')
+    .then((res) => console.log('인터셉터 적용 확인용 요청:', res.data))
+    .catch((err) => console.log('요청 실패:', err));
+
   const router = useRouter();
 
-  const goToLogin = () => {
-    router.push('/login');
+  const goToSignup = () => {
+    router.push('/signup');
   };
 
   const {
     register,
     handleSubmit,
-    getValues,
-    watch,
     setError,
     formState: { isSubmitted, isSubmitting, errors },
   } = useForm<FormValues>({
-    mode: 'onChange',
+    mode: 'onBlur',
   });
-
-  const agree = watch('agree');
 
   // tanstack
   const mutation = useMutation({
-    mutationFn: signup,
-    mutationKey: ['signup'],
+    mutationFn: login,
+    mutationKey: ['login'],
     onSuccess: (data) => {
-      console.log('회원가입 성공', data);
+      localStorage.setItem('accessToken', data.accessToken);
+      alert(`login 성공`);
     },
     onError: (err: unknown) => {
       const error = err as AxiosError<{ message: string }>;
-
+      if (error) {
+        alert(error.response?.data.message);
+      }
       if (error.response?.data.message.includes('이메일')) {
         setError('email', {
           type: 'server',
@@ -61,7 +63,6 @@ const SignUp = () => {
   const onSubmit = (data: FormValues) => {
     mutation.mutate({
       email: data.email,
-      nickname: data.nickname,
       password: data.password,
     });
   };
@@ -85,15 +86,7 @@ const SignUp = () => {
           error={errors.email?.message}
           {...register('email', validations.email)}
         />
-        <FormInput
-          type='text'
-          id='nickName'
-          label='닉네임'
-          placeholder='닉네임을 입력해 주세요'
-          aria-invalid={isSubmitted ? (errors.nickname ? 'true' : 'false') : undefined}
-          error={errors.nickname?.message}
-          {...register('nickname', validations.nickname)}
-        />
+
         <FormInput
           type='password'
           id='password'
@@ -103,35 +96,16 @@ const SignUp = () => {
           error={errors.password?.message}
           {...register('password', validations.password)}
         />
-        <FormInput
-          type='password'
-          id='confirmPassword'
-          label='비밀번호 확인'
-          placeholder='비밀번호를 한 번 더 입력해 주세요'
-          aria-invalid={isSubmitted ? (errors.confirmPassword ? 'true' : 'false') : undefined}
-          error={errors.confirmPassword?.message}
-          {...register(
-            'confirmPassword',
-            confirmPassword(() => getValues('password')),
-          )}
-        />
 
-        <div className='mb-2 flex items-center gap-1'>
-          <input type='checkbox' id='agree' {...register('agree')} />
-          <label htmlFor='agree' className='text-[14px]'>
-            이용약관에 동의합니다.
-          </label>
-        </div>
-
-        <Button type='submit' size='lg' className='w-full mt-2' disabled={!agree || isSubmitting}>
-          {isSubmitting ? '회원가입하기 중...' : '회원가입하기'}
+        <Button type='submit' size='lg' className='w-full mt-2' disabled={isSubmitting}>
+          {isSubmitting ? '로그인 중...' : '로그인하기'}
         </Button>
       </form>
 
       <div className='flex my-[30px] w-full items-center'>
         <hr className='w-full flex-grow' />
-        <span className='mx-4 text-[16px] text-[var(--grayscale-700)] w-full text-center whitespace-nowrap cursor-default'>
-          SNS 계정으로 회원가입하기
+        <span className='mx-4 text-[16px] text-[var(--grayscale-700)] text-center whitespace-nowrap cursor-default'>
+          or
         </span>
         <hr className='w-full flex-grow' />
       </div>
@@ -148,16 +122,25 @@ const SignUp = () => {
           alt='카카오톡 아이콘'
           className='w-6 h-6 object-contain'
         />
-        카카오 회원가입
+        카카오 로그인
       </Button>
       <p className='text-[var(--grayscale-400)] mt-[30px] cursor-default'>
-        회원이신가요?
-        <span onClick={goToLogin} className='underline cursor-pointer ml-1'>
-          로그인하기
+        회원이 아니신가요?
+        <span onClick={goToSignup} className='underline cursor-pointer ml-1'>
+          회원가입하기
         </span>
       </p>
+
+      <Button
+        onClick={() => {
+          localStorage.removeItem('accessToken');
+          alert('로그아웃 되었습니다.');
+        }}
+      >
+        로그아웃 (임시)
+      </Button>
     </div>
   );
 };
 
-export default SignUp;
+export default Login;

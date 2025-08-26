@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import { UserSigUp } from '@/types/users.types';
+import { UserSigUp } from '@/types/user.type';
 
 // 회원가입 api
 export const signup = async ({

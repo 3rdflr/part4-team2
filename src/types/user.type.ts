@@ -11,3 +11,10 @@ export interface UserProfile extends User {
   createdAt?: string;
   updatedAt?: string;
 }
+
+// 회원가입
+export interface UserSigUp extends User {
+  email: string;
+  createdAt: string;
+  updatedAt: string;
+}
