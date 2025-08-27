@@ -172,7 +172,7 @@ const Login = () => {
           {user && isLoggedIn ? (
             <>
               <p>아이디: {user.id}</p>
-              <p>아이디: {user.email}</p>
+              <p>이메일: {user.email}</p>
               <p>닉네임: {user.nickname}</p>
               {exp !== null && (
                 <p>
