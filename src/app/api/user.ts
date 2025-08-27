@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import { UserSigUp } from '@/types/user.type';
+import { UserSigUp, UserProfile } from '@/types/user.type';
 
 // 회원가입 api
 export const signup = async ({
@@ -12,5 +12,11 @@ export const signup = async ({
   password: string;
 }): Promise<UserSigUp> => {
   const response = await axiosInstance.post('/users', { email, nickname, password });
+  return response.data;
+};
+
+// 내 정보 조회 api
+export const getMe = async (): Promise<UserProfile> => {
+  const response = await axiosInstance.get('/users/me');
   return response.data;
 };

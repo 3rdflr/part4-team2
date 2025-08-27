@@ -1,60 +1,28 @@
 'use client';
 
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import FormInput from '@/components/common/FormInput';
 import { validations } from '@/lib/utils/validations';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
-import { login } from '../api/auth';
+import { useUserStore } from '@/store/userStore';
 import { AxiosError } from 'axios';
-import axiosInstance from '@/app/api/axiosInstance';
-import { useEffect, useState } from 'react';
+import { login } from '../api/auth';
+import { getMe } from '../api/user';
 
 type FormValues = {
   email: string;
   password: string;
 };
 
-// 로그인 정보 확인용
-interface User {
-  id: number;
-  email: string;
-  nickname: string;
-}
-
 const Login = () => {
-  // 로그인 정보 확인용
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [exp, setExp] = useState<number | null>(null);
+  const setUser = useUserStore((state) => state.setUser);
+  const user = useUserStore((state) => state.user);
+  const clearUser = useUserStore((state) => state.clearUser);
 
-  useEffect(() => {
-    axiosInstance
-      .get('/users/me')
-      .then((res) => {
-        setUser(res.data);
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-          try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            setExp(payload.exp);
-          } catch (e) {
-            console.error('토큰 파싱 실패 ', e);
-          }
-        }
-      })
-      .catch((err) => {
-        console.log('요청 실패:', err);
-        setUser(null);
-      });
-    if (typeof window !== 'undefined') {
-      setIsLoggedIn(!!localStorage.getItem('accessToken'));
-    }
-  }, []);
-
-  //
   const router = useRouter();
 
   const goToSignup = () => {
@@ -74,9 +42,13 @@ const Login = () => {
   const mutation = useMutation({
     mutationFn: login,
     mutationKey: ['login'],
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       localStorage.setItem('accessToken', data.accessToken);
-      setIsLoggedIn(true);
+
+      // 상태관리 저장
+      const user = await getMe();
+      setUser(user);
+
       alert(`login 성공`);
     },
     onError: (err: unknown) => {
@@ -169,30 +141,20 @@ const Login = () => {
       <div className='mt-10 border border-[var(--primary-500)] p-5'>
         <div className='grid gap-1 mb-4'>
           <h1 className='font-bold text-lg'>로그인 정보 </h1>
-          {isLoggedIn ? (
-            user ? (
-              <>
-                <p>아이디: {user.id}</p>
-                <p>이메일: {user.email}</p>
-                <p>닉네임: {user.nickname}</p>
-                {exp !== null && (
-                  <p>
-                    만료 시간: {new Date(exp * 1000).toLocaleString()} ({exp})
-                  </p>
-                )}
-              </>
-            ) : (
-              <p>사용자 정보 불러오는 중...</p>
-            )
+          {user ? (
+            <>
+              <span>ID : {user.id}</span>
+              <span>닉네임 : {user.nickname}</span>
+            </>
           ) : (
             <p>로그인 정보가 현재 없습니다.</p>
           )}
         </div>
         <Button
           onClick={() => {
-            localStorage.removeItem('accessToken');
-            setIsLoggedIn(false);
             alert('로그아웃 되었습니다.');
+            clearUser();
+            localStorage.removeItem('accessToken');
           }}
         >
           로그아웃 (임시)
