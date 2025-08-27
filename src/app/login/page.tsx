@@ -169,17 +169,21 @@ const Login = () => {
       <div className='mt-10 border border-[var(--primary-500)] p-5'>
         <div className='grid gap-1 mb-4'>
           <h1 className='font-bold text-lg'>로그인 정보 </h1>
-          {user && isLoggedIn ? (
-            <>
-              <p>아이디: {user.id}</p>
-              <p>이메일: {user.email}</p>
-              <p>닉네임: {user.nickname}</p>
-              {exp !== null && (
-                <p>
-                  만료 시간: {new Date(exp * 1000).toLocaleString()} ({exp})
-                </p>
-              )}
-            </>
+          {isLoggedIn ? (
+            user ? (
+              <>
+                <p>아이디: {user.id}</p>
+                <p>이메일: {user.email}</p>
+                <p>닉네임: {user.nickname}</p>
+                {exp !== null && (
+                  <p>
+                    만료 시간: {new Date(exp * 1000).toLocaleString()} ({exp})
+                  </p>
+                )}
+              </>
+            ) : (
+              <p>사용자 정보 불러오는 중...</p>
+            )
           ) : (
             <p>로그인 정보가 현재 없습니다.</p>
           )}
