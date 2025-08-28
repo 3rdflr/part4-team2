@@ -16,7 +16,7 @@ export const signup = async ({
 };
 
 // 내 정보 조회 api
-export const getMe = async (): Promise<UserProfile> => {
+export const getUserInfo = async (): Promise<UserProfile> => {
   const response = await axiosInstance.get('/users/me');
   return response.data;
 };

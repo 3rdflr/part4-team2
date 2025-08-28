@@ -11,7 +11,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useUserStore } from '@/store/userStore';
 import { AxiosError } from 'axios';
 import { login } from '../api/auth';
-import { getMe } from '../api/user';
+import { getUserInfo } from '../api/user';
 
 type FormValues = {
   email: string;
@@ -46,7 +46,7 @@ const Login = () => {
       localStorage.setItem('accessToken', data.accessToken);
 
       // 상태관리 저장
-      const user = await getMe();
+      const user = await getUserInfo();
       setUser(user);
 
       alert(`login 성공`);
