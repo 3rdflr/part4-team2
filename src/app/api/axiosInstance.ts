@@ -58,25 +58,24 @@ export function createAxiosInstance(context?: Pick<GetServerSidePropsContext, 'r
         originalRequest._retry = true;
 
         // 클라이언트일 때만 큐 처리
-        if (isClient) {
-          if (isRefreshing) {
-            return new Promise((resolve, reject) => {
-              failedQueue.push({
-                resolve: () => resolve(instance(originalRequest)),
-                reject,
-              });
+        if (isClient && isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({
+              resolve: () => resolve(instance(originalRequest)),
+              reject,
             });
-          }
-          isRefreshing = true;
+          });
         }
 
+        if (isClient) isRefreshing = true;
+
         try {
-          // 서버에서 새 AccessToken을 쿠키로 내려줌
+          // 새 AccessToken을 쿠키로 내려줌
           await axios.post(
             `${BASE_URL}/auth/tokens`,
             {},
             {
-              withCredentials: true,
+              withCredentials: isClient,
               headers:
                 !isClient && context?.req?.headers.cookie
                   ? { Cookie: context.req.headers.cookie }
@@ -86,7 +85,7 @@ export function createAxiosInstance(context?: Pick<GetServerSidePropsContext, 'r
 
           if (isClient) processQueue(null);
 
-          // 큐 처리
+          // 큐 대기 처리
           return instance(originalRequest);
         } catch (error) {
           const refreshError = error as AxiosError;
@@ -96,6 +95,7 @@ export function createAxiosInstance(context?: Pick<GetServerSidePropsContext, 'r
           //  페이지이동(추가예정...)
           // const router = useRouter();
           // router.push('/');
+          // 로컬 스토리지,, 사용자 관련 데이터(e.g., 사용자 정보)를 모두 삭제하는 로그아웃 처리 로직을 추가
 
           return Promise.reject(refreshError);
         } finally {
