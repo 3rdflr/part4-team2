@@ -1,4 +1,4 @@
-import axiosInstance from './axiosInstance';
+import axiosInstance from './axiosClient';
 import {
   ActivitiesCategoryType,
   ActivitiesSortType,

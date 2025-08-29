@@ -36,9 +36,22 @@ async function handleRequest(method: string, req: Request, path: string[]) {
       url: backendUrl.toString(),
       headers: Object.fromEntries(headers.entries()),
       data: body,
+      validateStatus: () => true,
     });
 
     // 4. 백엔드 응답을 클라이언트에 전달
+    const resHeaders = new Headers({ 'Content-Type': 'application/json' });
+
+    // 5. 백엔드에서 온 Set-Cookie 헤더를 Next.js 응답 헤더에 직접 복사
+    const setCookieHeader = response.headers['set-cookie'];
+    if (setCookieHeader) {
+      if (Array.isArray(setCookieHeader)) {
+        setCookieHeader.forEach((cookie) => resHeaders.append('Set-Cookie', cookie));
+      } else {
+        resHeaders.append('Set-Cookie', setCookieHeader);
+      }
+    }
+
     return new NextResponse(JSON.stringify(response.data), {
       status: response.status,
       headers: { 'Content-Type': 'application/json' },
