@@ -14,15 +14,11 @@ let failedQueue: FailedRequest[] = []; // 재발급 완료까지 대기하는 �
 /**
  * 큐에 쌓인 요청들을 처리합니다.
  * @param error - 에러가 발생한 경우, 에러 객체를 전달합니다.
- * @param token - 재발급된 새로운 토큰
  */
-const processQueue = (error: AxiosError | null, token: string | null = null) => {
+const processQueue = (error: AxiosError | null) => {
   failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else {
-      resolve(token ?? undefined);
-    }
+    if (error) reject(error);
+    else resolve();
   });
   failedQueue = [];
 };
@@ -32,25 +28,16 @@ const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
-  // withCredentials: true,
+  withCredentials: true,
 });
 
-// 요청 인터셉터 : Access Token 헤더 자동 첨부
+// 요청 인터셉터
 axiosInstance.interceptors.request.use(
-  (config) => {
-    // 브라우저 환경일 때만 실행
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('accessToken');
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return config;
-  },
+  (config) => config,
   (error) => Promise.reject(error),
 );
 
-// 요청 인터셉터 : 401 에러 처리 및 토큰 재발급
+// 요청 인터셉터 : 401 에러 처리
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -61,12 +48,7 @@ axiosInstance.interceptors.response.use(
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
-            resolve: (token: string | null = null) => {
-              if (originalRequest.headers) {
-                originalRequest.headers.Authorization = `Bearer ${token}`;
-              }
-              resolve(axiosInstance(originalRequest));
-            },
+            resolve: () => resolve(axiosInstance(originalRequest)),
             reject,
           });
         });
@@ -75,17 +57,15 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await axiosInstance.post('/auth/tokens', {});
-        const newAccessToken = data.accessToken;
+        // 서버에서 새 AccessToken을 쿠키로 내려줌
+        await axios.post(`${BASE_URL}/auth/tokens`, {}, { withCredentials: true });
 
-        localStorage.setItem('accessToken', newAccessToken); // 새로운 Access Token 저장
-        axiosInstance.defaults.headers.Authorization = `Bearer ${newAccessToken}`; // Axios 인스턴스의 기본 헤더를 업데이트
-
-        processQueue(null, newAccessToken); // 큐에 있던 요청들을 새로운 토큰으로 재처리
-        return axiosInstance(originalRequest); // 실패했던 원래 요청을 다시 시도
+        // 큐 처리
+        processQueue(null);
+        return axiosInstance(originalRequest);
       } catch (error) {
         const refreshError = error as AxiosError;
-        processQueue(refreshError, null); // 큐에 있는 모든 요청을 실패 처리
+        processQueue(refreshError);
 
         if (refreshError.response?.status === 401) {
           console.error('세션이 만료되었습니다. 다시 로그인해주세요.');
@@ -94,9 +74,6 @@ axiosInstance.interceptors.response.use(
         } else {
           console.error('알 수 없는 오류가 발생했습니다.');
         }
-
-        // Refresh Token 만료 시 accessToken 삭제
-        localStorage.removeItem('accessToken');
 
         //  페이지이동(추가예정...)
         // const router = useRouter();
