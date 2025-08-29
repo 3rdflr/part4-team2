@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 
 interface FailedRequest {
   resolve: (value?: string) => void;
@@ -54,8 +54,23 @@ axiosClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        // 🔄 수정된 부분: refreshToken을 body에 포함
+        const cookies = document.cookie.split(';').reduce(
+          (acc, cookie) => {
+            const [key, value] = cookie.trim().split('=');
+            acc[key] = value;
+            return acc;
+          },
+          {} as Record<string, string>,
+        );
+
+        const refreshToken = cookies.refreshToken;
+
         // 새 AccessToken을 쿠키로 내려줌
-        await axiosClient.post('/auth/tokens', {});
+        await axiosClient.post('/auth/tokens', {
+          refreshToken: refreshToken, // refreshToken을 body에 포함
+        });
+
         processQueue(null);
 
         // 큐 대기 처리
@@ -65,13 +80,14 @@ axiosClient.interceptors.response.use(
 
         processQueue(refreshError);
 
+        // 쿠키 삭제 및 로그인 페이지로 리다이렉트
+        document.cookie = 'accessToken=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        document.cookie = 'refreshToken=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+
         //  페이지이동(추가예정...)
         // const router = useRouter();
-        // router.push('/');
+        // router.push('/login');
 
-        // 로컬 스토리지,, 사용자 관련 데이터(e.g., 사용자 정보)를 모두 삭제하는 로그아웃 처리 로직을 추가
-        const router = useRouter();
-        router.push('/login');
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

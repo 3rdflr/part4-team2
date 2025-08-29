@@ -49,10 +49,7 @@ const Login = () => {
   const mutation = useMutation({
     mutationFn: login,
     mutationKey: ['login'],
-    onSuccess: async (data) => {
-      localStorage.setItem('accessToken', data.accessToken);
-
-      // 유저 정보 Store 저장
+    onSuccess: async () => {
       const user = await getUserInfo();
       setUser(user);
 
@@ -197,7 +194,7 @@ const Login = () => {
           onClick={() => {
             alert('로그아웃 되었습니다.');
             clearUser();
-            localStorage.removeItem('accessToken');
+            // localStorage.removeItem('accessToken');
           }}
         >
           로그아웃 (임시)

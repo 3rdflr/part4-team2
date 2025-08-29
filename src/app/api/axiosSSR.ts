@@ -20,13 +20,29 @@ export async function axiosSSR<T = unknown>(path: string, options?: RequestOptio
   const headersList = headers();
   const cookie = headersList.get('cookie');
 
+  // 쿠키에서 accessToken 추출
+  let accessToken = '';
+  if (cookie) {
+    // 쿠키에서 토큰 추출
+    const cookies = cookie.split(';').reduce(
+      (acc, cookie) => {
+        const [key, value] = cookie.trim().split('=');
+        acc[key] = value;
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+
+    accessToken = cookies.accessToken || '';
+  }
+
   try {
     const response = await axios({
       method: options?.method || 'GET',
       url: `${BASE_URL}/${path}`,
       headers: {
         'Content-Type': 'application/json',
-        ...(cookie ? { Cookie: cookie } : {}),
+        ...(cookie ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
       data: options?.body,
     });

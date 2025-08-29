@@ -19,11 +19,34 @@ async function handleRequest(method: string, req: Request, path: string[]) {
   try {
     // 1. 클라이언트 요청의 모든 헤더를 복사하여 백엔드로 전달
     const headers = new Headers();
+
+    // 쿠키에서 accessToken 추출
+    let accessToken = '';
+    const cookieHeader = req.headers.get('cookie'); // 브라우저에서 온 쿠키 읽기
+    if (cookieHeader) {
+      // 쿠키에서 토큰 추출
+      const cookies = cookieHeader.split(';').reduce(
+        (acc, cookie) => {
+          const [key, value] = cookie.trim().split('=');
+          acc[key] = value;
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
+
+      accessToken = cookies.accessToken || '';
+    }
+
     req.headers.forEach((value, key) => {
       if (!['host', 'connection'].includes(key.toLowerCase())) {
         headers.set(key, value);
       }
     });
+
+    // accessToken이 있으면 Authorization 헤더로 추가
+    if (accessToken) {
+      headers.set('Authorization', `Bearer ${accessToken}`);
+    }
 
     // 2. GET 요청이 아닐 경우 요청 본문을 파싱
     const body = method !== 'GET' ? await req.text() : undefined;
@@ -37,6 +60,7 @@ async function handleRequest(method: string, req: Request, path: string[]) {
       headers: Object.fromEntries(headers.entries()),
       data: body,
       validateStatus: () => true,
+      withCredentials: true, // 추가
     });
 
     // 4. 백엔드 응답을 클라이언트에 전달
@@ -50,11 +74,28 @@ async function handleRequest(method: string, req: Request, path: string[]) {
       } else {
         resHeaders.append('Set-Cookie', setCookieHeader);
       }
+    } else {
+      // 백엔드가 쿠키를 설정하지 않으면 응답 데이터에서 토큰을 찾아서 직접 쿠키로 설정
+      if (response.data && (response.data.accessToken || response.data.token)) {
+        const token = response.data.accessToken || response.data.token;
+        const cookieValue = `accessToken=${token}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+        resHeaders.append('Set-Cookie', cookieValue);
+      }
+
+      // 리프레시 토큰도 설정
+      if (response.data && response.data.refreshToken) {
+        const refreshToken = response.data.refreshToken;
+        const refreshCookieValue = `refreshToken=${refreshToken}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+        resHeaders.append('Set-Cookie', refreshCookieValue);
+      }
     }
+
+    // CORS 헤더
+    resHeaders.set('Access-Control-Allow-Credentials', 'true');
 
     return new NextResponse(JSON.stringify(response.data), {
       status: response.status,
-      headers: { 'Content-Type': 'application/json' },
+      headers: resHeaders, // 수정: resHeaders 사용
     });
   } catch (error) {
     const axiosError = error as AxiosError;
