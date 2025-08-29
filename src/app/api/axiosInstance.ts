@@ -26,13 +26,13 @@ const processQueue = (error: AxiosError | null) => {
 
 /**
  * axiosInstance 생성
- * @param context SSR인 경우 { req }를 전달, 클라이언트면 undefined
+ * @param context SSR인 경우 { req }를 전달
  */
 export function createAxiosInstance(context?: Pick<GetServerSidePropsContext, 'req'>) {
   const isClient = typeof window != 'undefined';
 
   const instance = axios.create({
-    baseURL: BASE_URL,
+    baseURL: isClient ? '/api/proxy' : BASE_URL,
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json',
@@ -70,9 +70,12 @@ export function createAxiosInstance(context?: Pick<GetServerSidePropsContext, 'r
         if (isClient) isRefreshing = true;
 
         try {
+          // refresh API 요청 (클라이언트: 프록시, SSR: API 직통)
+          const refreshUrl = isClient ? '/api/proxy/auth/tokens' : `${BASE_URL}/auth/tokens`;
+
           // 새 AccessToken을 쿠키로 내려줌
           await axios.post(
-            `${BASE_URL}/auth/tokens`,
+            refreshUrl,
             {},
             {
               withCredentials: isClient,
@@ -95,6 +98,7 @@ export function createAxiosInstance(context?: Pick<GetServerSidePropsContext, 'r
           //  페이지이동(추가예정...)
           // const router = useRouter();
           // router.push('/');
+
           // 로컬 스토리지,, 사용자 관련 데이터(e.g., 사용자 정보)를 모두 삭제하는 로그아웃 처리 로직을 추가
 
           return Promise.reject(refreshError);
