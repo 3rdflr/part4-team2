@@ -1,4 +1,5 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { GetServerSidePropsContext } from 'next';
 
 // 기본 URL 설정
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://sp-globalnomad-api.vercel.app/16-2';
@@ -23,69 +24,90 @@ const processQueue = (error: AxiosError | null) => {
   failedQueue = [];
 };
 
-// Axios 인스턴스 생성
-const axiosInstance = axios.create({
-  baseURL: BASE_URL,
-  timeout: 10000,
-  headers: { 'Content-Type': 'application/json' },
-  withCredentials: true,
-});
+/**
+ * axiosInstance 생성
+ * @param context SSR인 경우 { req }를 전달, 클라이언트면 undefined
+ */
+export function createAxiosInstance(context?: Pick<GetServerSidePropsContext, 'req'>) {
+  const isClient = typeof window != 'undefined';
 
-// 요청 인터셉터
-axiosInstance.interceptors.request.use(
-  (config) => config,
-  (error) => Promise.reject(error),
-);
+  const instance = axios.create({
+    baseURL: BASE_URL,
+    timeout: 10000,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(context?.req?.headers?.cookie ? { Cookie: context.req.headers.cookie } : {}),
+    },
+    withCredentials: isClient,
+  });
 
-// 요청 인터셉터 : 401 에러 처리
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+  // 요청 인터셉터
+  instance.interceptors.request.use(
+    (config) => config,
+    (error) => Promise.reject(error),
+  );
 
-    // HTTP 상태 코드가 401이고, 재시도 플래그가 없는 경우
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({
-            resolve: () => resolve(axiosInstance(originalRequest)),
-            reject,
-          });
-        });
-      }
-      originalRequest._retry = true;
-      isRefreshing = true;
+  // 요청 인터셉터 : 401 에러 처리
+  instance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest: AxiosRequestConfig & { _retry?: boolean } = error.config;
 
-      try {
-        // 서버에서 새 AccessToken을 쿠키로 내려줌
-        await axios.post(`${BASE_URL}/auth/tokens`, {}, { withCredentials: true });
+      // HTTP 상태 코드가 401이고, 재시도 플래그가 없는 경우
+      if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+        originalRequest._retry = true;
 
-        // 큐 처리
-        processQueue(null);
-        return axiosInstance(originalRequest);
-      } catch (error) {
-        const refreshError = error as AxiosError;
-        processQueue(refreshError);
-
-        if (refreshError.response?.status === 401) {
-          console.error('세션이 만료되었습니다. 다시 로그인해주세요.');
-        } else if (refreshError.response?.status === 500) {
-          console.error('서버 에러가 발생했습니다. 잠시 후 다시 시도해주세요.');
-        } else {
-          console.error('알 수 없는 오류가 발생했습니다.');
+        // 클라이언트일 때만 큐 처리
+        if (isClient) {
+          if (isRefreshing) {
+            return new Promise((resolve, reject) => {
+              failedQueue.push({
+                resolve: () => resolve(instance(originalRequest)),
+                reject,
+              });
+            });
+          }
+          isRefreshing = true;
         }
 
-        //  페이지이동(추가예정...)
-        // const router = useRouter();
-        // router.push('/');
+        try {
+          // 서버에서 새 AccessToken을 쿠키로 내려줌
+          await axios.post(
+            `${BASE_URL}/auth/tokens`,
+            {},
+            {
+              withCredentials: true,
+              headers:
+                !isClient && context?.req?.headers.cookie
+                  ? { Cookie: context.req.headers.cookie }
+                  : undefined,
+            },
+          );
 
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
+          if (isClient) processQueue(null);
+
+          // 큐 처리
+          return instance(originalRequest);
+        } catch (error) {
+          const refreshError = error as AxiosError;
+
+          if (isClient) processQueue(refreshError);
+
+          //  페이지이동(추가예정...)
+          // const router = useRouter();
+          // router.push('/');
+
+          return Promise.reject(refreshError);
+        } finally {
+          if (isClient) isRefreshing = false;
+        }
       }
-    }
-    return Promise.reject(error);
-  },
-);
+      return Promise.reject(error);
+    },
+  );
 
+  return instance;
+}
+
+const axiosInstance = createAxiosInstance();
 export default axiosInstance;
