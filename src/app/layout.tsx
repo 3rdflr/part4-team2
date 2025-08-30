@@ -6,8 +6,10 @@ import QueryProvider from '@/providers/QueryProvider';
 import { pretendard } from '@/lib/fonts';
 import './globals.css';
 import { Suspense } from 'react';
-import Nav from '@/components/common/Nav';
+// import Nav from '@/components/common/Nav';
 import { OverlayProvider } from '@/components/common/OverlayProvider';
+
+import Nav from '@/components/home/NavContent';
 
 export const metadata: Metadata = {
   title: 'Trivera',

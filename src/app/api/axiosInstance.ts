@@ -1,106 +1,77 @@
-import axios, { AxiosError } from 'axios';
-
-// 기본 URL 설정
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://sp-globalnomad-api.vercel.app/16-2';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 interface FailedRequest {
-  resolve: (value?: string) => void;
+  resolve: (value?: unknown) => void; // 타입 수정
   reject: (error?: AxiosError | unknown) => void;
 }
 
-let isRefreshing = false; // 재발급 진행 중 여부
-let failedQueue: FailedRequest[] = []; // 재발급 완료까지 대기하는 요청 큐
+let isRefreshing = false;
+let failedQueue: FailedRequest[] = []; // API 대기하는 요청 큐
 
 /**
  * 큐에 쌓인 요청들을 처리합니다.
  * @param error - 에러가 발생한 경우, 에러 객체를 전달합니다.
- * @param token - 재발급된 새로운 토큰
  */
-const processQueue = (error: AxiosError | null, token: string | null = null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else {
-      resolve(token ?? undefined);
-    }
-  });
+const processQueue = (error: AxiosError | null) => {
+  failedQueue.forEach(({ resolve, reject }) => (error ? reject(error) : resolve()));
   failedQueue = [];
 };
 
-// Axios 인스턴스 생성
+// 기본 URL 설정
+const BASE_URL = '/api/proxy';
+
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
-  // withCredentials: true,
+  withCredentials: true,
 });
 
-// 요청 인터셉터 : Access Token 헤더 자동 첨부
-axiosInstance.interceptors.request.use(
-  (config) => {
-    // 브라우저 환경일 때만 실행
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('accessToken');
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-// 요청 인터셉터 : 401 에러 처리 및 토큰 재발급
+// 요청 인터셉터: 401 에러 처리
 axiosInstance.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+  async (error: AxiosError) => {
+    // 에러 발생 시 config 객체가 없을 때
+    if (!error.config) return Promise.reject(error);
+
+    // 타입 에러를 해결하기 위해 `InternalAxiosRequestConfig` 타입 사용
+    const originalRequest: InternalAxiosRequestConfig & { _retry?: boolean } = error.config;
 
     // HTTP 상태 코드가 401이고, 재시도 플래그가 없는 경우
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      // 클라이언트일 때만 큐 처리
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
-            resolve: (token: string | null = null) => {
-              if (originalRequest.headers) {
-                originalRequest.headers.Authorization = `Bearer ${token}`;
-              }
-              resolve(axiosInstance(originalRequest));
-            },
+            resolve: () => resolve(axiosInstance(originalRequest)),
             reject,
           });
         });
       }
-      originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const { data } = await axiosInstance.post('/auth/tokens', {});
-        const newAccessToken = data.accessToken;
+        // refreshToken은 HttpOnly라서 클라이언트에서 못 읽음
+        // 프록시 서버에서 처리하도록 요청
+        await axiosInstance.post('/auth/refresh-token');
 
-        localStorage.setItem('accessToken', newAccessToken); // 새로운 Access Token 저장
-        axiosInstance.defaults.headers.Authorization = `Bearer ${newAccessToken}`; // Axios 인스턴스의 기본 헤더를 업데이트
+        processQueue(null);
 
-        processQueue(null, newAccessToken); // 큐에 있던 요청들을 새로운 토큰으로 재처리
-        return axiosInstance(originalRequest); // 실패했던 원래 요청을 다시 시도
+        // 큐 대기 처리
+        return axiosInstance(originalRequest);
       } catch (error) {
         const refreshError = error as AxiosError;
-        processQueue(refreshError, null); // 큐에 있는 모든 요청을 실패 처리
+        processQueue(refreshError);
 
-        if (refreshError.response?.status === 401) {
-          console.error('세션이 만료되었습니다. 다시 로그인해주세요.');
-        } else if (refreshError.response?.status === 500) {
-          console.error('서버 에러가 발생했습니다. 잠시 후 다시 시도해주세요.');
-        } else {
-          console.error('알 수 없는 오류가 발생했습니다.');
-        }
+        // 쿠키 삭제
+        document.cookie = 'accessToken=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        document.cookie = 'refreshToken=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 
-        // Refresh Token 만료 시 accessToken 삭제
-        localStorage.removeItem('accessToken');
-
-        //  페이지이동(추가예정...)
-        // const router = useRouter();
-        // router.push('/');
+        // sessionStorage에 메시지 저장하고 즉시 페이지 이동
+        sessionStorage.setItem('loginMessage', '세션이 만료되었습니다.');
+        window.location.href = '/login';
 
         return Promise.reject(refreshError);
       } finally {
