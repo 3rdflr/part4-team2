@@ -28,8 +28,8 @@ const ImageUploader = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    const fileList = Array.from(e.target.files);
 
+    const fileList = Array.from(e.target.files);
     const newImages = [...fileList, ...files].slice(0, maxImages);
     onChange?.(newImages);
     e.target.value = '';
@@ -118,7 +118,7 @@ const ImageUploader = ({
       <input
         ref={inputRef}
         type='file'
-        accept='image/*'
+        accept='image/png, image/jpeg'
         multiple
         className='hidden'
         onChange={handleFileChange}

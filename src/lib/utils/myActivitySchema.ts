@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { parse, isAfter, isValid } from 'date-fns';
+import { parse, isValid, isAfter, isBefore } from 'date-fns';
 
 export const MyActivitySchema = z
   .object({
@@ -18,9 +18,7 @@ export const MyActivitySchema = z
       .array(
         z.object({
           id: z.union([z.string(), z.number()]).optional(),
-          date: z
-            .string()
-            .refine((val) => /^\d{2}\/\d{2}\/\d{2}$/.test(val), '날짜를 입력해주세요'),
+          date: z.string(),
           startTime: z.string(),
           endTime: z.string(),
         }),
@@ -29,39 +27,93 @@ export const MyActivitySchema = z
         const seen = new Set<string>();
 
         schedules.forEach((s, i) => {
-          // 1) 날짜 또는 시간 입력 안됨
-          if (!s.date || !s.startTime || !s.endTime) {
+          // 날짜 입력 체크
+          if (!s.date) {
             ctx.addIssue({
               code: 'custom',
               path: [i, 'date'],
-              message: '날짜와 시간을 모두 입력해주세요.',
+              message: '날짜를 입력해주세요.',
             });
             return;
           }
 
-          const startDate = parse(`${s.date} ${s.startTime}`, 'yyyy/MM/dd HH:mm', new Date());
-          const endDate = parse(`${s.date} ${s.endTime}`, 'yyyy/MM/dd HH:mm', new Date());
-
-          if (!isValid(startDate) || !isValid(endDate)) {
+          // 날짜 형식 검사
+          if (!/^\d{2}\/\d{2}\/\d{2}$/.test(s.date)) {
             ctx.addIssue({
               code: 'custom',
               path: [i, 'date'],
-              message: '날짜와 시간을 올바르게 입력해주세요.',
+              message: '날짜를 올바른 형식으로 입력해주세요.',
             });
             return;
           }
 
-          // 2) 시작 시간이 종료 시간보다 늦은 경우
-          if (isAfter(startDate, endDate) || startDate.getTime() === endDate.getTime()) {
+          // 실제 유효한 날짜인지 체크
+          const parsedDate = parse(s.date, 'yy/MM/dd', new Date());
+          if (!isValid(parsedDate)) {
             ctx.addIssue({
               code: 'custom',
               path: [i, 'date'],
-              message: '시작 시간을 종료 시간보다 앞으로 설정해주세요.',
+              message: '날짜를 올바른 형식으로 입력해주세요.',
             });
             return;
           }
 
-          // 3) 예약 시간 중복 체크
+          // 시간 입력 체크
+          if (!s.startTime || !s.endTime) {
+            ctx.addIssue({
+              code: 'custom',
+              path: [i, 'date'],
+              message: '시작 시간과 종료 시간을 모두 입력해주세요.',
+            });
+            return;
+          }
+
+          const now = new Date();
+
+          let [startHour, startMin] = s.startTime.split(':').map(Number);
+          let [endHour, endMin] = s.endTime.split(':').map(Number);
+          if (startHour === 24 && startMin === 0) {
+            startHour = 23;
+            startMin = 59;
+          }
+
+          if (endHour === 24 && endMin === 0) {
+            endHour = 23;
+            endMin = 59;
+          }
+
+          const startDate = parse(
+            `${s.date} ${String(startHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')}`,
+            'yy/MM/dd HH:mm',
+            new Date(),
+          );
+          const endDate = parse(
+            `${s.date} ${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`,
+            'yy/MM/dd HH:mm',
+            new Date(),
+          );
+
+          // 현재 시각 이후인지 체크
+          if (isBefore(startDate, now)) {
+            ctx.addIssue({
+              code: 'custom',
+              path: [i, 'date'],
+              message: '현재 시각 이후의 일정만 등록 가능합니다.',
+            });
+            return;
+          }
+
+          // 시작 시간 < 종료 시간 체크
+          if (!isAfter(endDate, startDate)) {
+            ctx.addIssue({
+              code: 'custom',
+              path: [i, 'date'],
+              message: '시작 시간을 종료 시간보다 이전으로 설정해주세요.',
+            });
+            return;
+          }
+
+          // 예약 시간 중복 체크
           const key = `${s.date}-${s.startTime}-${s.endTime}`;
           if (seen.has(key)) {
             ctx.addIssue({
@@ -71,6 +123,7 @@ export const MyActivitySchema = z
             });
             return;
           }
+
           seen.add(key);
         });
       }),

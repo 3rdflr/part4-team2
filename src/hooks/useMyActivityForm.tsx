@@ -1,6 +1,6 @@
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MyActivitySchema } from '@/types/myActivitySchema';
+import { MyActivityFormData, MyActivitySchema } from '@/lib/utils/myActivitySchema';
 import { useMutation } from '@tanstack/react-query';
 import {
   ActivityCreateRequest,
@@ -13,20 +13,20 @@ import {
   updateActivity,
   uploadActivityImage,
 } from '@/app/api/activities';
-import { createToast } from 'react-simplified-package';
-import { FaCheckCircle } from 'react-icons/fa';
-import { ActivityDetail } from '@/types/activities.type';
+import { ActivitiesCategoryType, ActivityDetail } from '@/types/activities.type';
+import { successToast } from '@/lib/utils/toastUtils';
+import { toApiDate } from '@/lib/utils/dateUtils';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-const useMyActivityForm = () => {
-  const successToast = createToast(
-    (str) => (
-      <div className='flex items-center text-green-500 border border-green-500 p-4 rounded-lg bg-white shadow-md'>
-        <FaCheckCircle className='mr-1' />
-        <span className='text-xs'>{str}이 완료되었습니다.</span>
-      </div>
-    ),
-    { duration: 3000 },
-  );
+interface useMyActivityForm {
+  mode?: 'EDIT' | 'REGISTER';
+  activityId?: string;
+}
+
+const useMyActivityForm = ({ mode = 'REGISTER', activityId }: useMyActivityForm) => {
+  const router = useRouter();
+  const [originalSchedules, setOriginalSchedules] = useState<MyActivityFormData['schedules']>([]);
 
   const methods = useForm({
     resolver: zodResolver(MyActivitySchema),
@@ -94,8 +94,9 @@ const useMyActivityForm = () => {
     mutationFn: (data: ActivityCreateRequest) => createActivity(data),
     retry: 1,
     retryDelay: 300,
-    onSuccess: () => {
-      successToast.run('등록');
+    onSuccess: (response) => {
+      router.push(`/activities/${response.id}`);
+      successToast.run('등록이 완료되었습니다.');
     },
     onError: (error) => {
       console.log('업로드 실패', error);
@@ -110,13 +111,109 @@ const useMyActivityForm = () => {
     mutationFn: ({ activityId, data }) => updateActivity(activityId, data),
     retry: 1,
     retryDelay: 300,
-    onSuccess: () => {
-      successToast.run('수정');
+    onSuccess: (response) => {
+      router.push(`/activities/${response.id}`);
+      successToast.run('수정이 완료되었습니다.');
     },
     onError: (error) => {
       console.log('업로드 실패', error);
     },
   });
+
+  const uploadImageAndGetUrl = async () => {
+    const bannerFiles = watch('bannerFiles') ?? [];
+    const subFiles = watch('subFiles') ?? [];
+
+    if (bannerFiles.length > 0) {
+      const bannerUploadResponse = await uploadImageMutation.mutateAsync(bannerFiles[0]);
+      setValue('bannerImageUrl', bannerUploadResponse.activityImageUrl, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+
+    if (subFiles.length > 0) {
+      const subImagesUploadResponse = await Promise.all(
+        subFiles.map((file) => uploadImageMutation.mutateAsync(file)),
+      );
+
+      const subImageUrls = subImagesUploadResponse.map((res) => res.activityImageUrl);
+
+      if (mode === 'EDIT') {
+        setValue('subImageUrlsToAdd', subImageUrls, { shouldValidate: true, shouldDirty: true });
+      } else {
+        setValue('subImageUrls', subImageUrls, { shouldValidate: true, shouldDirty: true });
+      }
+    }
+  };
+
+  const registerForm = async () => {
+    const values = methods.getValues();
+
+    const params: ActivityCreateRequest = {
+      ...values,
+      category: values.category as ActivitiesCategoryType,
+      price: Number(values.price.replace(/,/g, '')),
+      subImageUrls: values.subImageUrls ?? [],
+      schedules: values.schedules.map(({ date, startTime, endTime }) => ({
+        date: toApiDate(date),
+        startTime,
+        endTime,
+      })),
+    };
+
+    registerMutation.mutate(params);
+  };
+
+  const updateForm = async () => {
+    const values = methods.getValues();
+
+    // 삭제된 스케줄
+    const scheduleIdsToRemove: number[] = originalSchedules
+      .filter((s) => {
+        const current = values.schedules.find((v) => v.id === s.id);
+        if (!current) return true;
+
+        return (
+          current.date !== s.date ||
+          current.startTime !== s.startTime ||
+          current.endTime !== s.endTime
+        );
+      })
+      .map((s) => Number(s.id));
+
+    // 새로 추가된 스케줄
+    const schedulesToAdd = values.schedules
+      .filter((s) => {
+        if (!s.id) return true;
+
+        const original = originalSchedules.find((v) => v.id === s.id);
+        if (!original) return true;
+
+        return (
+          original.date !== s.date ||
+          original.startTime !== s.startTime ||
+          original.endTime !== s.endTime
+        );
+      })
+      .map(({ date, startTime, endTime }) => ({
+        date: toApiDate(date),
+        startTime,
+        endTime,
+      }));
+
+    const params: ActivityUpdateRequest = {
+      ...values,
+      category: values.category as ActivitiesCategoryType,
+      price: Number(values.price.replace(/,/g, '')),
+      scheduleIdsToRemove,
+      schedulesToAdd,
+      subImageIdsToRemove: values.subImageIdsToRemove ?? [],
+      subImageUrlsToAdd: values.subImageUrlsToAdd ?? [],
+    };
+
+    updateMutation.mutate({ activityId: Number(activityId), data: params });
+  };
 
   return {
     methods,
@@ -135,6 +232,10 @@ const useMyActivityForm = () => {
     uploadImageMutation,
     registerMutation,
     updateMutation,
+    uploadImageAndGetUrl,
+    registerForm,
+    updateForm,
+    setOriginalSchedules,
   };
 };
 

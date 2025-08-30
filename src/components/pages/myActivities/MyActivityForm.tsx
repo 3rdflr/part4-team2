@@ -9,21 +9,18 @@ import {
   Merge,
 } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
-import ImageUploader from '@/components/pages/myActivities/ImageUploader';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import CategorySelect from './CategorySelect';
-import Script from 'next/script';
-import { MyActivityFormData } from '@/types/myActivitySchema';
+import { MyActivityFormData } from '@/lib/utils/myActivitySchema';
 import FormInput from '@/components/common/FormInput';
 import clsx from 'clsx';
 import { MyActivitySchedule } from '@/types/myActivity.types';
-import { ActivityCreateRequest, ActivityUpdateRequest } from '@/app/api/activities';
-import { ActivitiesCategoryType } from '@/types/activities.type';
-import { useEffect, useState } from 'react';
-import { toApiDate, toInputDate } from '@/lib/utils/dateUtils';
-import { SubImage } from '@/types/activities.types';
+import { useEffect } from 'react';
+import { toInputDate } from '@/lib/utils/dateUtils';
 import useMyActivityForm from '@/hooks/useMyActivityForm';
+import ImageUploadSection from './ImageUploadSection';
+import Script from 'next/script';
 
 interface MyActivityFormProps {
   mode?: 'EDIT' | 'REGISTER';
@@ -38,44 +35,16 @@ const MyActivityForm = ({ mode = 'REGISTER', activityId }: MyActivityFormProps) 
     scheduleFields,
     register,
     setValue,
-    watch,
     trigger,
     update,
     append,
     remove,
     getDetailMutation,
-    uploadImageMutation,
-    registerMutation,
-    updateMutation,
-  } = useMyActivityForm();
-  const [originalSchedules, setOriginalSchedules] = useState<MyActivityFormData['schedules']>([]);
-
-  const uploadImageAndGetUrl = async () => {
-    const bannerFiles = watch('bannerFiles') ?? [];
-    const subFiles = watch('subFiles') ?? [];
-
-    if (bannerFiles.length > 0) {
-      const bannerUploadResponse = await uploadImageMutation.mutateAsync(bannerFiles[0]);
-      setValue('bannerImageUrl', bannerUploadResponse.activityImageUrl, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    }
-
-    if (subFiles.length > 0) {
-      const subImagesUploadResponse = await Promise.all(
-        subFiles.map((file) => uploadImageMutation.mutateAsync(file)),
-      );
-
-      const subImageUrls = subImagesUploadResponse.map((res) => res.activityImageUrl);
-
-      if (mode === 'EDIT') {
-        setValue('subImageUrlsToAdd', subImageUrls, { shouldValidate: true, shouldDirty: true });
-      } else {
-        setValue('subImageUrls', subImageUrls, { shouldValidate: true, shouldDirty: true });
-      }
-    }
-  };
+    uploadImageAndGetUrl,
+    registerForm,
+    updateForm,
+    setOriginalSchedules,
+  } = useMyActivityForm({ mode, activityId });
 
   const handleOpenAddressSearch = () => {
     new window.daum.Postcode({
@@ -84,74 +53,6 @@ const MyActivityForm = ({ mode = 'REGISTER', activityId }: MyActivityFormProps) 
         setValue('address', addr, { shouldValidate: true });
       },
     }).open();
-  };
-
-  const registerForm = async () => {
-    const values = methods.getValues();
-
-    const params: ActivityCreateRequest = {
-      ...values,
-      category: values.category as ActivitiesCategoryType,
-      price: Number(values.price.replace(/,/g, '')),
-      subImageUrls: values.subImageUrls ?? [],
-      schedules: values.schedules.map(({ date, startTime, endTime }) => ({
-        date: toApiDate(date),
-        startTime,
-        endTime,
-      })),
-    };
-
-    registerMutation.mutate(params);
-  };
-
-  const updateForm = async () => {
-    const values = methods.getValues();
-
-    // 삭제된 스케줄
-    const scheduleIdsToRemove: number[] = originalSchedules
-      .filter((s) => {
-        const current = values.schedules.find((v) => v.id === s.id);
-        if (!current) return true;
-
-        return (
-          current.date !== s.date ||
-          current.startTime !== s.startTime ||
-          current.endTime !== s.endTime
-        );
-      })
-      .map((s) => Number(s.id));
-
-    // 새로 추가된 스케줄
-    const schedulesToAdd = values.schedules
-      .filter((s) => {
-        if (!s.id) return true;
-
-        const original = originalSchedules.find((v) => v.id === s.id);
-        if (!original) return true;
-
-        return (
-          original.date !== s.date ||
-          original.startTime !== s.startTime ||
-          original.endTime !== s.endTime
-        );
-      })
-      .map(({ date, startTime, endTime }) => ({
-        date: toApiDate(date),
-        startTime,
-        endTime,
-      }));
-
-    const params: ActivityUpdateRequest = {
-      ...values,
-      category: values.category as ActivitiesCategoryType,
-      price: Number(values.price.replace(/,/g, '')),
-      scheduleIdsToRemove,
-      schedulesToAdd,
-      subImageIdsToRemove: values.subImageIdsToRemove ?? [],
-      subImageUrlsToAdd: values.subImageUrlsToAdd ?? [],
-    };
-
-    updateMutation.mutate({ activityId: Number(activityId), data: params });
   };
 
   const onSubmit = async (data: MyActivityFormData) => {
@@ -214,6 +115,7 @@ const MyActivityForm = ({ mode = 'REGISTER', activityId }: MyActivityFormProps) 
                 label='제목'
                 placeholder='제목을 입력해 주세요'
                 error={errors.title?.message}
+                maxLength={20}
                 {...register('title')}
               />
             </div>
@@ -229,11 +131,16 @@ const MyActivityForm = ({ mode = 'REGISTER', activityId }: MyActivityFormProps) 
                   <div>
                     <CategorySelect
                       value={field.value ?? undefined}
+                      error={fieldState.error}
                       onChange={field.onChange}
                       onBlur={() => {
                         field.onBlur();
                         trigger('category');
                       }}
+                      className={
+                        fieldState.error &&
+                        'border-destructive/20 bg-destructive/10 dark:bg-destructive/20'
+                      }
                     />
                     {fieldState.error && (
                       <small className='text-12-medium ml-2 text-[var(--secondary-red-500)] mt-[6px] leading-[12px]'>
@@ -364,103 +271,7 @@ const MyActivityForm = ({ mode = 'REGISTER', activityId }: MyActivityFormProps) 
           </div>
 
           {/* 이미지 등록 */}
-          <div className='flex flex-col gap-7.5 mt-5'>
-            <div className='flex flex-col'>
-              <Label>배너 이미지 등록</Label>
-              <span className='text-12-regular text-grayscale-500 py-1'>
-                <span className='text-primary-500 mr-0.5'>*</span>배너 이미지는 필수입니다
-              </span>
-              <Controller
-                name='bannerFiles'
-                control={control}
-                rules={{ required: '배너 이미지를 업로드해주세요' }}
-                render={({ field, fieldState }) => (
-                  <div>
-                    <ImageUploader
-                      maxImages={1}
-                      files={field.value || []}
-                      fetchedImages={
-                        methods.getValues('bannerImages')?.length
-                          ? methods.getValues('bannerImages')
-                          : []
-                      }
-                      onChange={(val) => {
-                        field.onChange(val);
-                        field.onBlur();
-                      }}
-                      onDeleteFetched={() => {
-                        setValue('bannerImageUrl', '', {
-                          shouldValidate: true,
-                          shouldDirty: true,
-                        });
-                        methods.setValue('bannerImages', [], {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        });
-                        field.onChange([]);
-                      }}
-                    />
-                    {fieldState.error && (
-                      <small className='text-12-medium ml-2 text-[var(--secondary-red-500)] mt-[6px] leading-[12px]'>
-                        {fieldState.error.message}
-                      </small>
-                    )}
-                  </div>
-                )}
-              />
-            </div>
-
-            <div className='flex flex-col'>
-              <Label>소개 이미지 등록</Label>
-              <span className='text-12-regular text-grayscale-500 py-1'>
-                <span className='text-primary-500 mr-0.5'>*</span>소개 이미지는 최소 2개 이상
-                등록해주세요
-              </span>
-              <Controller
-                name='subFiles'
-                control={control}
-                rules={{ required: '배너 이미지를 업로드해주세요' }}
-                render={({ field, fieldState }) => (
-                  <div>
-                    <ImageUploader
-                      files={field.value || []}
-                      fetchedImages={methods.getValues('subImages')}
-                      onChange={(val) => field.onChange(val)}
-                      onDeleteFetched={(id) => {
-                        if (id !== undefined) {
-                          const prev = methods.getValues('subImageIdsToRemove') || [];
-                          methods.setValue('subImageIdsToRemove', [...prev, id], {
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          });
-
-                          // subImages 배열에서 삭제
-                          const prevImages = (methods.getValues('subImages') as SubImage[]) || [];
-                          const newImages = prevImages.filter((img) => img.id !== id);
-                          methods.setValue('subImages', newImages, {
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          });
-
-                          field.onChange([]);
-                        }
-                      }}
-                    />
-                    {fieldState.error && (
-                      <small className='text-12-medium ml-2 text-[var(--secondary-red-500)] mt-[6px] leading-[12px]'>
-                        {fieldState.error.message}
-                      </small>
-                    )}
-                  </div>
-                )}
-              />
-            </div>
-            {/* 다음 주소 API 스크립트 */}
-            <Script
-              src='//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'
-              strategy='afterInteractive'
-            />
-          </div>
+          <ImageUploadSection control={control} methods={methods} setValue={setValue} />
 
           <div className='flex justify-center w-full mt-6'>
             <Button
@@ -473,6 +284,12 @@ const MyActivityForm = ({ mode = 'REGISTER', activityId }: MyActivityFormProps) 
           </div>
         </form>
       </FormProvider>
+
+      {/* 다음 주소 API 스크립트 */}
+      <Script
+        src='//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'
+        strategy='afterInteractive'
+      />
     </div>
   );
 };

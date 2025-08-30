@@ -6,16 +6,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ActivitiesCategoryType } from '@/types/activities.type';
+import clsx from 'clsx';
+import { FieldError } from 'react-hook-form';
 
 interface CategorySelectProps {
   value: string;
+  error?: FieldError;
   onChange: (val: string) => void;
   onBlur: () => void;
+  className?: string;
 }
 
-const categories = ['문화 · 예술', '식음료', '스포츠', '투어', '관광', '웰빙'];
+const categories: ActivitiesCategoryType[] = [
+  '문화 · 예술',
+  '식음료',
+  '스포츠',
+  '투어',
+  '관광',
+  '웰빙',
+];
 
-const CategorySelect = ({ value, onChange, onBlur }: CategorySelectProps) => {
+const CategorySelect = ({ value, error, onChange, onBlur, className }: CategorySelectProps) => {
   return (
     <Select
       value={value}
@@ -26,8 +38,13 @@ const CategorySelect = ({ value, onChange, onBlur }: CategorySelectProps) => {
         }
       }}
     >
-      <SelectTrigger className='w-full'>
-        <SelectValue placeholder='카테고리를 선택해 주세요' />
+      <SelectTrigger
+        className={clsx('w-full', className, error && 'data-[placeholder]:text-destructive/50')}
+      >
+        <SelectValue
+          placeholder='카테고리를 선택해 주세요'
+          className={clsx(error && 'placeholder:text-destructive/50')}
+        />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
