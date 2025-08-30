@@ -133,21 +133,21 @@ export interface AvailableScheduleRequest {
 export const getActivitiesList = async (
   params: ActivitiesListRequest,
 ): Promise<ActivitiesListResponse> => {
-  // 목업 데이터 사용 (개발 단계)
-  const { mockActivitiesList } = await import('@/mocks/activities.mock');
+  // // 목업 데이터 사용 (개발 단계)
+  // const { mockActivitiesList } = await import('@/mocks/activities.mock');
 
-  // 실제 API 호출 시뮬레이션을 위한 지연
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  // // 실제 API 호출 시뮬레이션을 위한 지연
+  // await new Promise((resolve) => setTimeout(resolve, 300));
 
-  return {
-    cursorId: 0,
-    totalCount: mockActivitiesList.length,
-    activities: mockActivitiesList.slice(0, params.size || 20),
-  };
+  // return {
+  //   cursorId: 0,
+  //   totalCount: mockActivitiesList.length,
+  //   activities: mockActivitiesList.slice(0, params.size || 20),
+  // };
 
   // 실제 API 호출 (추후 활성화)
-  // const response = await axiosInstance.get('/activities', { params });
-  // return response.data;
+  const response = await axiosInstance.get('/activities', { params });
+  return response.data;
 };
 
 /**

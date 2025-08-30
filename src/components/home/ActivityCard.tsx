@@ -36,6 +36,7 @@ export default function ActivityCard({
               setIsError(true);
             }}
             blurDataURL={baseImageUrl}
+            priority
           />
         </div>
         <div className='absolute top-[16px] left-[16px] flex items-center text-grayscale-500'>
