@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-// import { useRouter } from 'next/navigation';
+import { errorToast } from '@/components/common/Toast';
 
 interface FailedRequest {
   resolve: (value?: string) => void;
@@ -54,7 +54,7 @@ axiosClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // 🔄 수정된 부분: refreshToken을 body에 포함
+        // refreshToken을 body에 포함
         const cookies = document.cookie.split(';').reduce(
           (acc, cookie) => {
             const [key, value] = cookie.trim().split('=');
@@ -77,16 +77,18 @@ axiosClient.interceptors.response.use(
         return axiosClient(originalRequest);
       } catch (error) {
         const refreshError = error as AxiosError;
-
         processQueue(refreshError);
+
+        errorToast.run('세션이 만료되었습니다.');
 
         // 쿠키 삭제 및 로그인 페이지로 리다이렉트
         document.cookie = 'accessToken=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         document.cookie = 'refreshToken=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 
-        //  페이지이동(추가예정...)
-        // const router = useRouter();
-        // router.push('/login');
+        // 페이지 이동
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
 
         return Promise.reject(refreshError);
       } finally {
