@@ -11,7 +11,7 @@ export default async function Home({
     keyword: string;
     'min-price': string;
     'max-price': string;
-    address: string;
+    place: string;
   };
 }) {
   const category = searchParams.category || '';
@@ -19,7 +19,7 @@ export default async function Home({
 
   const params = new URLSearchParams({
     method: 'cursor',
-    size: '99',
+    size: '28',
     ...(category && { category }),
     ...(keyword && { keyword }),
   });
@@ -41,7 +41,7 @@ export default async function Home({
 
   const minPrice = Number(searchParams['min-price'] || 0);
   const maxPrice = Number(searchParams['max-price'] || Infinity);
-  const address = searchParams.address || '';
+  const address = searchParams.place || '';
 
   const activities = activitiesData.activities.filter(
     (item: Activity) =>

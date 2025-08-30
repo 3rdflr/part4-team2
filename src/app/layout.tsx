@@ -27,6 +27,7 @@ export default function RootLayout({
             <ToastProvider />
             <OverlayProvider>
               <Nav />
+
               {children}
               <div className='fixed bottom-0 left-0 right-0 flex items-center justify-between px-12 py-4 bg-black w-full  h-[82px] zindex-50 text-white'>
                 bottom nav for mobile test

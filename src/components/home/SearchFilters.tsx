@@ -242,7 +242,7 @@ export default function SearchFilters({ scrollY, isSearching, setIsSearching }: 
                     setOpenedSection('place');
                   }}
                   placeholder='여행지 검색'
-                  className='bg-transparent text-sm text-title focus:outline-none placeholder:text-14-regular placeholder:text-subtitle truncate'
+                  className='bg-transparent text-12-medium text-title focus:outline-none placeholder:text-14-regular placeholder:text-subtitle truncate'
                   style={{ minWidth: 0 }}
                 />
               )}
@@ -301,7 +301,7 @@ export default function SearchFilters({ scrollY, isSearching, setIsSearching }: 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.18 }}
-            className={`relative top-0 mt-3 bg-white rounded-2xl shadow-xl p-8 z-40 ${openedSection === 'place' ? 'w-[425px] h-[344px] overflow-y-scroll' : 'left-[275px] w-[540px]'}`}
+            className={`relative top-0 mt-3 bg-white rounded-2xl shadow-xl p-9 z-40 ${openedSection === 'place' ? 'w-[425px] h-[344px] overflow-y-scroll' : 'left-[275px] w-[540px]'}`}
           >
             <button
               className='absolute top-3 right-3 text-gray-400 hover:text-gray-600'

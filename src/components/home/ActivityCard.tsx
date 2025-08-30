@@ -7,7 +7,13 @@ import { useRouter } from 'next/navigation';
 import ActivityLike from './ActivityLike';
 import { FaStar as StarIcon } from 'react-icons/fa';
 
-export default function ActivityCard({ activity }: { activity: Activity }) {
+export default function ActivityCard({
+  activity,
+  userId,
+}: {
+  activity: Activity;
+  userId?: number;
+}) {
   const router = useRouter();
   // 로그인 상태에 따라 변경 예정
   const [isError, setIsError] = useState(false);
@@ -44,7 +50,7 @@ export default function ActivityCard({ activity }: { activity: Activity }) {
             )}
           </div>
         </div>
-        <ActivityLike activity={activity} userId={activity.id} />
+        {userId && <ActivityLike activity={activity} userId={userId} />}
       </div>
 
       <div className='p-[8px] gap-[6px] flex flex-col'>

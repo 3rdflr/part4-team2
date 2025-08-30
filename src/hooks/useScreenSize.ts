@@ -1,7 +1,7 @@
 import { useLayoutEffect, useState } from 'react';
 
 export function useScreenSize() {
-  const [width, setWidth] = useState(0);
+  const [width, setWidth] = useState(1024); // 초기값을 데스크탑으로 설정
 
   useLayoutEffect(() => {
     function handleResize() {

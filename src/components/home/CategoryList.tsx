@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useTransform, MotionValue } from 'framer-motion';
-import { categories } from './CategoriesData';
+import { Categories } from './Constants';
 import { useSearchParams } from 'next/navigation';
 import CategoryButton from './CategoryButton';
 
@@ -31,10 +31,10 @@ export default function CategoryList({
         y: styleY,
         scale: styleScale, // 크기 줄어듦
       }}
-      className='flex justify-center overflow-x-auto overflow-y-hidden scrollbar-hide w-full'
+      className='px-10 flex justify-center overflow-x-auto overflow-y-hidden scrollbar-hide w-full'
     >
-      <div className='flex gap-2 px-2'>
-        {categories.map((category) => (
+      <div className='flex gap-5 px-2'>
+        {Categories.map((category) => (
           <CategoryButton
             key={category.category}
             category={category.category}
