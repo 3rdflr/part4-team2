@@ -1,5 +1,6 @@
 import { headers } from 'next/headers';
 import axios, { AxiosError } from 'axios';
+import { parse } from 'cookie';
 
 interface RequestOptions<T = unknown> {
   method?: string;
@@ -18,23 +19,9 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://sp-globalnomad-api.
 export async function axiosSSR<T = unknown>(path: string, options?: RequestOptions<T>) {
   // 서버 컴포넌트에서 클라이언트의 요청 헤더를 가져옴
   const headersList = headers();
-  const cookie = headersList.get('cookie');
-
-  // 쿠키에서 accessToken 추출
-  let accessToken = '';
-  if (cookie) {
-    // 쿠키에서 토큰 추출
-    const cookies = cookie.split(';').reduce(
-      (acc, cookie) => {
-        const [key, value] = cookie.trim().split('=');
-        acc[key] = value;
-        return acc;
-      },
-      {} as Record<string, string>,
-    );
-
-    accessToken = cookies.accessToken || '';
-  }
+  const cookieHeader = headersList.get('cookie') || '';
+  const cookies = parse(cookieHeader);
+  const accessToken = cookies.accessToken || '';
 
   try {
     const response = await axios({
@@ -42,7 +29,7 @@ export async function axiosSSR<T = unknown>(path: string, options?: RequestOptio
       url: `${BASE_URL}/${path}`,
       headers: {
         'Content-Type': 'application/json',
-        ...(cookie ? { Authorization: `Bearer ${accessToken}` } : {}),
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
       data: options?.body,
     });

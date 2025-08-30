@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { NextResponse } from 'next/server';
+import { parse } from 'cookie';
 
 // 모든 HTTP 메서드에 대한 핸들러를 생성하는 함수
 function makeHandler(method: string) {
@@ -17,26 +18,20 @@ export const PATCH = makeHandler('PATCH');
 // 클라이언트 요청을 처리하는 비동기 함수
 async function handleRequest(method: string, req: Request, path: string[]) {
   try {
-    // 1. 클라이언트 요청의 모든 헤더를 복사하여 백엔드로 전달
-    const headers = new Headers();
+    const pathString = path.join('/');
 
-    // 쿠키에서 accessToken 추출
-    let accessToken = '';
-    const cookieHeader = req.headers.get('cookie'); // 브라우저에서 온 쿠키 읽기
-    if (cookieHeader) {
-      // 쿠키에서 토큰 추출
-      const cookies = cookieHeader.split(';').reduce(
-        (acc, cookie) => {
-          const [key, value] = cookie.trim().split('=');
-          acc[key] = value;
-          return acc;
-        },
-        {} as Record<string, string>,
-      );
-
-      accessToken = cookies.accessToken || '';
+    // 토큰 갱신 전용 엔드포인트 추가
+    if (pathString === 'auth/refresh-token') {
+      return handleTokenRefresh(req);
     }
 
+    // 쿠키 파싱
+    const cookieHeader = req.headers.get('cookie') || '';
+    const cookies = parse(cookieHeader);
+    const accessToken = cookies.accessToken || '';
+
+    // 1. 클라이언트 요청의 모든 헤더를 복사하여 백엔드로 전달
+    const headers = new Headers();
     req.headers.forEach((value, key) => {
       if (!['host', 'connection'].includes(key.toLowerCase())) {
         headers.set(key, value);
@@ -51,7 +46,7 @@ async function handleRequest(method: string, req: Request, path: string[]) {
     // 2. GET 요청이 아닐 경우 요청 본문을 파싱
     const body = method !== 'GET' ? await req.text() : undefined;
 
-    const backendUrl = new URL(`https://sp-globalnomad-api.vercel.app/16-2/${path.join('/')}`);
+    const backendUrl = new URL(`https://sp-globalnomad-api.vercel.app/16-2/${pathString}`);
 
     // 3. Axios 요청 생성
     const response = await axios({
@@ -78,11 +73,11 @@ async function handleRequest(method: string, req: Request, path: string[]) {
       // 백엔드가 쿠키를 설정하지 않으면 응답 데이터에서 토큰을 찾아서 직접 쿠키로 설정
       if (response.data && (response.data.accessToken || response.data.token)) {
         const token = response.data.accessToken || response.data.token;
-        const cookieValue = `accessToken=${token}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+        const cookieValue = `accessToken=${token}; Path=/; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
         resHeaders.append('Set-Cookie', cookieValue);
       }
 
-      // 리프레시 토큰도 설정
+      // refreshToken만 HttpOnly로 설정
       if (response.data && response.data.refreshToken) {
         const refreshToken = response.data.refreshToken;
         const refreshCookieValue = `refreshToken=${refreshToken}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
@@ -103,5 +98,59 @@ async function handleRequest(method: string, req: Request, path: string[]) {
     const data = axiosError.response?.data || { error: 'Unknown server error' };
 
     return new NextResponse(JSON.stringify(data), { status });
+  }
+}
+
+// 토큰 갱신 전용 처리 함수
+async function handleTokenRefresh(req: Request) {
+  try {
+    // refreshToken 추출 (서버에서만 HttpOnly 쿠키 읽을 수 있음)
+    const cookieHeader = req.headers.get('cookie') || '';
+    const cookies = parse(cookieHeader);
+    const refreshToken = cookies.refreshToken;
+
+    if (!refreshToken) {
+      return new NextResponse(JSON.stringify({ error: 'No refresh token' }), { status: 401 });
+    }
+
+    // 백엔드에 토큰 갱신 요청
+    const response = await axios.post(
+      'https://sp-globalnomad-api.vercel.app/16-2/auth/tokens',
+      { refreshToken },
+      { validateStatus: () => true },
+    );
+
+    if (response.status !== 200) {
+      return new NextResponse(JSON.stringify(response.data), { status: response.status });
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+    // 새 토큰들을 쿠키로 설정해서 반환
+    const resHeaders = new Headers({ 'Content-Type': 'application/json' });
+
+    if (response.data.accessToken) {
+      const accessCookie = `accessToken=${response.data.accessToken}; Path=/; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+      resHeaders.append('Set-Cookie', accessCookie);
+    }
+
+    if (response.data.refreshToken) {
+      const refreshCookie = `refreshToken=${response.data.refreshToken}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+      resHeaders.append('Set-Cookie', refreshCookie);
+    }
+
+    return new NextResponse(
+      JSON.stringify({ success: true, tokens: { accessToken, refreshToken: newRefreshToken } }),
+      {
+        status: 200,
+        headers: resHeaders,
+      },
+    );
+  } catch (error) {
+    const refreshError = error as AxiosError;
+    return new NextResponse(
+      JSON.stringify({ error: 'Token refresh failed', details: refreshError.message }),
+      { status: 500 },
+    );
   }
 }

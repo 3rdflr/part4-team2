@@ -1,5 +1,5 @@
-import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { errorToast } from '@/components/common/Toast';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { errorToast } from '@/lib/utils/toastUtils';
 
 interface FailedRequest {
   resolve: (value?: string) => void;
@@ -36,7 +36,7 @@ axiosClient.interceptors.response.use(
     if (!error.config) return Promise.reject(error);
 
     // 타입 에러를 해결하기 위해 `InternalAxiosRequestConfig` 타입 사용
-    const originalRequest: AxiosRequestConfig & { _retry?: boolean } = error.config;
+    const originalRequest: InternalAxiosRequestConfig & { _retry?: boolean } = error.config;
 
     // HTTP 상태 코드가 401이고, 재시도 플래그가 없는 경우
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -54,22 +54,9 @@ axiosClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // refreshToken을 body에 포함
-        const cookies = document.cookie.split(';').reduce(
-          (acc, cookie) => {
-            const [key, value] = cookie.trim().split('=');
-            acc[key] = value;
-            return acc;
-          },
-          {} as Record<string, string>,
-        );
-
-        const refreshToken = cookies.refreshToken;
-
-        // 새 AccessToken을 쿠키로 내려줌
-        await axiosClient.post('/auth/tokens', {
-          refreshToken: refreshToken, // refreshToken을 body에 포함
-        });
+        // refreshToken은 HttpOnly라서 클라이언트에서 못 읽음
+        // 프록시 서버에서 처리하도록 요청
+        await axiosClient.post('/auth/refresh-token');
 
         processQueue(null);
 
