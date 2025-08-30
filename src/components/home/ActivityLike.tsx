@@ -19,7 +19,7 @@ export default function ActivityLike({ activity, userId, size = 28 }: FavoriteBu
     initializeUser(userId);
   }, [userId, initializeUser]);
 
-  const isLiked = isFavorite(activity.id);
+  const isLiked = isFavorite(userId);
 
   return (
     <button
