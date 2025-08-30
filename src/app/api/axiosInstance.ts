@@ -20,7 +20,7 @@ const processQueue = (error: AxiosError | null) => {
 // 기본 URL 설정
 const BASE_URL = '/api/proxy';
 
-const axiosClient = axios.create({
+const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
@@ -28,7 +28,7 @@ const axiosClient = axios.create({
 });
 
 // 요청 인터셉터: 401 에러 처리
-axiosClient.interceptors.response.use(
+axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     // 에러 발생 시 config 객체가 없을 때
@@ -45,7 +45,7 @@ axiosClient.interceptors.response.use(
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
-            resolve: () => resolve(axiosClient(originalRequest)),
+            resolve: () => resolve(axiosInstance(originalRequest)),
             reject,
           });
         });
@@ -55,12 +55,12 @@ axiosClient.interceptors.response.use(
       try {
         // refreshToken은 HttpOnly라서 클라이언트에서 못 읽음
         // 프록시 서버에서 처리하도록 요청
-        await axiosClient.post('/auth/refresh-token');
+        await axiosInstance.post('/auth/refresh-token');
 
         processQueue(null);
 
         // 큐 대기 처리
-        return axiosClient(originalRequest);
+        return axiosInstance(originalRequest);
       } catch (error) {
         const refreshError = error as AxiosError;
         processQueue(refreshError);
@@ -82,4 +82,4 @@ axiosClient.interceptors.response.use(
   },
 );
 
-export default axiosClient;
+export default axiosInstance;
