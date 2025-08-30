@@ -15,7 +15,7 @@ import CategorySelect from './CategorySelect';
 import { MyActivityFormData } from '@/lib/utils/myActivitySchema';
 import FormInput from '@/components/common/FormInput';
 import clsx from 'clsx';
-import { MyActivitySchedule } from '@/types/myActivity.types';
+import { MyActivitySchedule } from '@/types/myActivity.type';
 import { useEffect } from 'react';
 import { toInputDate } from '@/lib/utils/dateUtils';
 import useMyActivityForm from '@/hooks/useMyActivityForm';
@@ -142,11 +142,9 @@ const MyActivityForm = ({ mode = 'REGISTER', activityId }: MyActivityFormProps) 
                         'border-destructive/20 bg-destructive/10 dark:bg-destructive/20'
                       }
                     />
-                    {fieldState.error && (
-                      <small className='text-12-medium ml-2 text-[var(--secondary-red-500)] mt-[6px] leading-[12px]'>
-                        {fieldState.error.message}
-                      </small>
-                    )}
+                    <small className='text-12-medium ml-2 text-[var(--secondary-red-500)] mt-[6px] leading-[12px] min-h-[20px]'>
+                      {fieldState?.error?.message}
+                    </small>
                   </div>
                 )}
               />
@@ -176,9 +174,7 @@ const MyActivityForm = ({ mode = 'REGISTER', activityId }: MyActivityFormProps) 
                     {...field}
                     value={
                       field.value
-                        ? new Intl.NumberFormat('ko-KR').format(
-                            Number(field.value.replace(/,/g, '')),
-                          )
+                        ? Number(field.value.replace(/,/g, '')).toLocaleString('ko-KR')
                         : ''
                     }
                     onChange={(e) => {
@@ -234,9 +230,7 @@ const MyActivityForm = ({ mode = 'REGISTER', activityId }: MyActivityFormProps) 
                 key={index}
                 className={clsx(
                   'w-full',
-                  errors?.schedules?.[index] ? '' : 'py-2.5',
                   index === 0 ? 'pt-4' : '',
-                  index === 0 && scheduleFields.length > 1 ? 'pb-5' : '',
                   index === 1 ? 'pt-5 border-t border-grayscale-100' : '',
                 )}
               >

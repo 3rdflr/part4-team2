@@ -19,11 +19,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           )}
           {...props}
         />
-        {error && (
-          <small className='text-12-medium ml-2 mt-1 text-[var(--secondary-red-500)] leading-[12px]'>
-            {error}
-          </small>
-        )}
+
+        <small className='text-12-medium ml-2 mt-1 text-[var(--secondary-red-500)] leading-[12px] min-h-[20px]'>
+          {error}
+        </small>
       </div>
     );
   },

@@ -1,7 +1,7 @@
 import DateInput from './DateInput';
 import StartEndTimeSelect from './StartEndTimeSelect';
 import RoundButton from './RoundButton';
-import { MyActivitySchedule } from '@/types/myActivity.types';
+import { MyActivitySchedule } from '@/types/myActivity.type';
 import { FieldError, FieldErrorsImpl, Merge } from 'react-hook-form';
 interface DateTimeRowProps {
   data: Omit<MyActivitySchedule, 'id'>;
@@ -43,11 +43,9 @@ const DateTimeRow = ({
           onChange={handleDateInputChange}
           onBlur={onBlur}
         />
-        {errors?.date && (
-          <small className='text-12-medium ml-2 text-[var(--secondary-red-500)] mt-[6px] leading-[12px]'>
-            {errors.date.message}
-          </small>
-        )}
+        <small className='text-12-medium ml-2 text-[var(--secondary-red-500)] mt-[6px] leading-[12px] min-h-[20px]'>
+          {errors?.date?.message}
+        </small>
       </div>
 
       <div className='flex flex-row items-end gap-3.5'>

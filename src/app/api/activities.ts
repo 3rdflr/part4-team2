@@ -169,17 +169,6 @@ export const getActivityDetail = async (activityId: number): Promise<ActivityDet
 };
 
 /**
- * 체험 수정
- */
-export const updateActivity = async (
-  activityId: number,
-  data: ActivityUpdateRequest,
-): Promise<ActivityUpdateResponse> => {
-  const response = await axiosInstance.patch(`/my-activities/${activityId}`, data);
-  return response.data;
-};
-
-/**
  * 체험 예약 가능일 조회
  */
 export const getAvailableSchedule = async (

@@ -10,7 +10,6 @@ import {
   createActivity,
   getActivityDetail,
   ImageUploadResponse,
-  updateActivity,
   uploadActivityImage,
 } from '@/app/api/activities';
 import { ActivitiesCategoryType, ActivityDetail } from '@/types/activities.type';
@@ -18,6 +17,7 @@ import { successToast } from '@/lib/utils/toastUtils';
 import { toApiDate } from '@/lib/utils/dateUtils';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { updateActivity } from '@/app/api/myActivities';
 
 interface useMyActivityForm {
   mode?: 'EDIT' | 'REGISTER';
@@ -70,12 +70,6 @@ const useMyActivityForm = ({ mode = 'REGISTER', activityId }: useMyActivityForm)
     mutationFn: (activityId) => getActivityDetail(activityId),
     retry: 1,
     retryDelay: 300,
-    onSuccess: (response) => {
-      console.log('상세 조회 성공', response);
-    },
-    onError: (error) => {
-      console.log('상세 조회 실패', error);
-    },
   });
 
   const uploadImageMutation = useMutation<ImageUploadResponse, Error, File>({
