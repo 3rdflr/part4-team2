@@ -55,7 +55,7 @@ async function handleRequest(method: string, req: Request, path: string[]) {
       headers: Object.fromEntries(headers.entries()),
       data: body,
       validateStatus: () => true,
-      withCredentials: true, // 추가
+      withCredentials: true,
     });
 
     // 4. 백엔드 응답을 클라이언트에 전달
@@ -71,14 +71,14 @@ async function handleRequest(method: string, req: Request, path: string[]) {
       }
     } else {
       // 백엔드가 쿠키를 설정하지 않으면 응답 데이터에서 토큰을 찾아서 직접 쿠키로 설정
-      if (response.data && (response.data.accessToken || response.data.token)) {
+      if (response.data?.accessToken || response.data?.token) {
         const token = response.data.accessToken || response.data.token;
         const cookieValue = `accessToken=${token}; Path=/; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
         resHeaders.append('Set-Cookie', cookieValue);
       }
 
       // refreshToken만 HttpOnly로 설정
-      if (response.data && response.data.refreshToken) {
+      if (response.data?.refreshToken) {
         const refreshToken = response.data.refreshToken;
         const refreshCookieValue = `refreshToken=${refreshToken}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
         resHeaders.append('Set-Cookie', refreshCookieValue);
@@ -90,7 +90,7 @@ async function handleRequest(method: string, req: Request, path: string[]) {
 
     return new NextResponse(JSON.stringify(response.data), {
       status: response.status,
-      headers: resHeaders, // 수정: resHeaders 사용
+      headers: resHeaders,
     });
   } catch (error) {
     const axiosError = error as AxiosError;
@@ -129,15 +129,12 @@ async function handleTokenRefresh(req: Request) {
     // 새 토큰들을 쿠키로 설정해서 반환
     const resHeaders = new Headers({ 'Content-Type': 'application/json' });
 
-    if (response.data.accessToken) {
-      const accessCookie = `accessToken=${response.data.accessToken}; Path=/; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
-      resHeaders.append('Set-Cookie', accessCookie);
-    }
+    // 중복 제거: response.data에서 직접 가져온 값 사용
+    const accessCookie = `accessToken=${accessToken}; Path=/; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+    resHeaders.append('Set-Cookie', accessCookie);
 
-    if (response.data.refreshToken) {
-      const refreshCookie = `refreshToken=${response.data.refreshToken}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
-      resHeaders.append('Set-Cookie', refreshCookie);
-    }
+    const refreshCookie = `refreshToken=${newRefreshToken}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+    resHeaders.append('Set-Cookie', refreshCookie);
 
     return new NextResponse(
       JSON.stringify({ success: true, tokens: { accessToken, refreshToken: newRefreshToken } }),

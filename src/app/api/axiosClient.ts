@@ -1,8 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { errorToast } from '@/lib/utils/toastUtils';
 
 interface FailedRequest {
-  resolve: (value?: string) => void;
+  resolve: (value?: unknown) => void; // 타입 수정
   reject: (error?: AxiosError | unknown) => void;
 }
 
@@ -14,7 +13,7 @@ let failedQueue: FailedRequest[] = []; // API 대기하는 요청 큐
  * @param error - 에러가 발생한 경우, 에러 객체를 전달합니다.
  */
 const processQueue = (error: AxiosError | null) => {
-  failedQueue.forEach(({ resolve, reject }) => (error ? reject(error) : resolve));
+  failedQueue.forEach(({ resolve, reject }) => (error ? reject(error) : resolve()));
   failedQueue = [];
 };
 
@@ -66,16 +65,13 @@ axiosClient.interceptors.response.use(
         const refreshError = error as AxiosError;
         processQueue(refreshError);
 
-        errorToast.run('세션이 만료되었습니다.');
-
-        // 쿠키 삭제 및 로그인 페이지로 리다이렉트
+        // 쿠키 삭제
         document.cookie = 'accessToken=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         document.cookie = 'refreshToken=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 
-        // 페이지 이동
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
+        // sessionStorage에 메시지 저장하고 즉시 페이지 이동
+        sessionStorage.setItem('loginMessage', '세션이 만료되었습니다.');
+        window.location.href = '/login';
 
         return Promise.reject(refreshError);
       } finally {
