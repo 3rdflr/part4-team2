@@ -12,6 +12,7 @@ import { useUserStore } from '@/store/userStore';
 import { AxiosError } from 'axios';
 import { login } from '../api/auth';
 import { getUserInfo } from '../api/user';
+import { logout } from '@/lib/utils/logoutUtils';
 
 type loginFormValues = {
   email: string;
@@ -21,7 +22,7 @@ type loginFormValues = {
 const Login = () => {
   const setUser = useUserStore((state) => state.setUser);
   const user = useUserStore((state) => state.user);
-  const clearUser = useUserStore((state) => state.clearUser);
+  // const clearUser = useUserStore((state) => state.clearUser);
 
   const router = useRouter();
 
@@ -190,15 +191,7 @@ const Login = () => {
             <p>로그인 정보가 현재 없습니다.</p>
           )}
         </div>
-        <Button
-          onClick={() => {
-            alert('로그아웃 되었습니다.');
-            clearUser();
-            // localStorage.removeItem('accessToken');
-          }}
-        >
-          로그아웃 (임시)
-        </Button>
+        <Button onClick={logout}>로그아웃 (임시)</Button>
       </div>
     </div>
   );

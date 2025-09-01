@@ -1,7 +1,8 @@
+import { useUserStore } from '@/store/userStore';
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 interface FailedRequest {
-  resolve: (value?: unknown) => void; // 타입 수정
+  resolve: (value?: unknown) => void;
   reject: (error?: AxiosError | unknown) => void;
 }
 
@@ -65,9 +66,11 @@ axiosInstance.interceptors.response.use(
         const refreshError = error as AxiosError;
         processQueue(refreshError);
 
-        // 쿠키 삭제
-        document.cookie = 'accessToken=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        document.cookie = 'refreshToken=; Path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        // 쿠키 삭제 + 유저 정보 삭제
+        fetch('/api/logout', { method: 'POST' });
+        useUserStore.getState().clearUser();
+
+        failedQueue = []; // 큐 초기화
 
         // sessionStorage에 메시지 저장하고 즉시 페이지 이동
         sessionStorage.setItem('loginMessage', '세션이 만료되었습니다.');

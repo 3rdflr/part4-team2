@@ -1,5 +1,6 @@
-import { headers } from 'next/headers';
 import axios, { AxiosError } from 'axios';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { parse } from 'cookie';
 
 interface RequestOptions<T = unknown> {
@@ -71,6 +72,11 @@ export async function axiosSSR<T = unknown>(path: string, options?: RequestOptio
   } catch (error) {
     const axiosError = error as AxiosError;
     console.error('서버에서 API 호출 실패:', axiosError.message);
+
+    // SSR 환경에서 401 에러 발생 시 처리
+    if (axiosError.response?.status === 401) {
+      redirect('/login?message=세션이%20만료되었습니다.');
+    }
 
     // 에러 객체 개선: 상태 코드와 응답 데이터 포함
     const errorData = axiosError.response?.data || { message: '알 수 없는 오류가 발생했습니다.' };
