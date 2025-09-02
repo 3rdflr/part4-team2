@@ -140,7 +140,7 @@ async function handleTokenRefresh(req: Request) {
     const response = await axios.post(
       `${BACKEND_URL}/auth/tokens`,
       { refreshToken },
-      { validateStatus: () => true },
+      { validateStatus: () => true, headers: { 'Content-Type': 'application/json' } },
     );
 
     if (response.status !== 200) {
@@ -152,12 +152,17 @@ async function handleTokenRefresh(req: Request) {
     // 새 토큰들을 쿠키로 설정해서 반환
     const resHeaders = new Headers({ 'Content-Type': 'application/json' });
 
-    // 중복 제거: response.data에서 직접 가져온 값 사용
+    // accessToken 쿠키 설정
     const accessCookie = `accessToken=${accessToken}; Path=/; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
     resHeaders.append('Set-Cookie', accessCookie);
 
+    // refreshToken이 새로 발급된 경우에만 업데이트?
     const refreshCookie = `refreshToken=${newRefreshToken}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
     resHeaders.append('Set-Cookie', refreshCookie);
+    // if (newRefreshToken && newRefreshToken !== refreshToken) {
+    //   const refreshCookie = `refreshToken=${newRefreshToken}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+    //   resHeaders.append('Set-Cookie', refreshCookie);
+    // }
 
     return new NextResponse(
       JSON.stringify({ success: true, tokens: { accessToken, refreshToken: newRefreshToken } }),
