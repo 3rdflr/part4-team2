@@ -11,9 +11,6 @@ import { signup } from '../api/user';
 import { AxiosError } from 'axios';
 import { useEffect } from 'react';
 
-import { registerKakao } from '../api/oauth';
-import { successToast } from '@/lib/utils/toastUtils';
-
 type FormValues = {
   email: string;
   password: string;
@@ -115,26 +112,16 @@ const SignUp = () => {
     });
   };
 
-  // 카카오 앱등록 + 회원가입
-  const KakaoMutation = useMutation({
-    mutationFn: async () => {
-      const appKey = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY!;
-      const appData = await registerKakao(appKey);
-      return appData;
-    },
-    onSuccess: (data) => {
-      const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_KAKAO_SIGNUP_REDIRECT_URI!)}&response_type=code&state=signup`;
+  // 카카오 회원가입
+  const handleKakaoSingUP = () => {
+    const REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY!;
+    const REDIRECT_URI = encodeURIComponent(process.env.NEXT_PUBLIC_KAKAO_SIGNUP_REDIRECT_URI!);
 
-      window.location.href = kakaoAuthUrl;
+    // 카카오 회원가입 페이지로 이동
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code&state=signup`;
 
-      successToast.run('카카오톡 등록 완료');
-      console.log('등록 성공:', data);
-    },
-    onError: (error) => {
-      successToast.run('카카오톡 등록 실패');
-      console.error('등록 실패:', error);
-    },
-  });
+    window.location.href = kakaoAuthUrl;
+  };
 
   return (
     <div className=' m-auto grid place-items-center px-[24px] max-w-[674px]'>
@@ -210,8 +197,13 @@ const SignUp = () => {
         </span>
         <hr className='w-full flex-grow' />
       </div>
-      {/* !!!!!!!!!!!!!!카카오 로그인!!!!!!!!!!! */}
-      <Button type='submit' variant='secondary' size='lg' onClick={() => KakaoMutation.mutate()}>
+      <Button
+        type='submit'
+        variant='secondary'
+        size='lg'
+        className='w-full bg-[#FEE500] text-[#3C1E1E] border-none'
+        onClick={handleKakaoSingUP}
+      >
         <Image
           src='/images/icons/icon_kakao.svg'
           width={24}

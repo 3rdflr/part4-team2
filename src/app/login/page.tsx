@@ -97,6 +97,7 @@ const Login = () => {
 
     // 카카오 로그인 페이지로 이동
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+
     window.location.href = kakaoAuthUrl; // 카카오 로그인 페이지로 이동
   };
 
