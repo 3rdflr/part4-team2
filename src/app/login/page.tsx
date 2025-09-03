@@ -22,8 +22,6 @@ type loginFormValues = {
 const Login = () => {
   const setUser = useUserStore((state) => state.setUser);
   const user = useUserStore((state) => state.user);
-  // const clearUser = useUserStore((state) => state.clearUser);
-
   const router = useRouter();
 
   const {
@@ -93,21 +91,21 @@ const Login = () => {
     retry: 0,
   });
 
+  const handleKakaoLogin = () => {
+    const REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY!;
+    const REDIRECT_URI = encodeURIComponent(process.env.NEXT_PUBLIC_KAKAO_LOGIN_REDIRECT_URI!);
+
+    // 카카오 로그인 페이지로 이동
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+    window.location.href = kakaoAuthUrl; // 카카오 로그인 페이지로 이동
+  };
+
   // 폼 제출
   const onSubmit = (data: loginFormValues) => {
     mutation.mutate({
       email: data.email,
       password: data.password,
     });
-  };
-
-  const handleKakaoLogin = () => {
-    const NEXT_PUBLIC_KAKAO_REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY!;
-    const redirectUri = encodeURIComponent(process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI!);
-
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${NEXT_PUBLIC_KAKAO_REST_API_KEY}&redirect_uri=${redirectUri}&response_type=code`;
-
-    window.location.href = kakaoAuthUrl;
   };
 
   return (
