@@ -8,23 +8,22 @@ export const registerKakao = async (appKey: string): Promise<KakaoApp> => {
 };
 
 // 카카오 간편 가입
-export const signUpKakao = async ({
-  nickname,
-  redirectUri,
-  token,
-}: {
-  provider: string;
-  nickname: string;
-  redirectUri: string;
-  token: string;
-}): Promise<AppSignUp> => {
-  const response = await axiosInstance.post('oauth/sign-up/kakao', {
-    nickname,
-    redirectUri,
-    token,
-  });
-  return response.data;
-};
+// export const signUpKakao = async ({
+//   nickname,
+//   redirectUri,
+//   token,
+// }: {
+//   nickname: string;
+//   redirectUri: string;
+//   token: string;
+// }): Promise<AppSignUp> => {
+//   const response = await axiosInstance.post('/oauth/sign-up/kakao', {
+//     nickname,
+//     redirectUri,
+//     token,
+//   });
+//   return response.data;
+// };
 
 // 카카오 간편 로그인
 export const signInKakao = async ({
@@ -35,7 +34,7 @@ export const signInKakao = async ({
   redirectUri: string;
   token: string;
 }): Promise<AppSignUp> => {
-  const response = await axiosInstance.post('oauth/sign-in/kakao', {
+  const response = await axiosInstance.post('/oauth/sign-in/kakao', {
     redirectUri,
     token,
   });

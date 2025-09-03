@@ -101,6 +101,15 @@ const Login = () => {
     });
   };
 
+  const handleKakaoLogin = () => {
+    const NEXT_PUBLIC_KAKAO_REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY!;
+    const redirectUri = encodeURIComponent(process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI!);
+
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${NEXT_PUBLIC_KAKAO_REST_API_KEY}&redirect_uri=${redirectUri}&response_type=code`;
+
+    window.location.href = kakaoAuthUrl;
+  };
+
   return (
     <div className=' m-auto grid place-items-center px-[24px] max-w-[674px]'>
       <Image
@@ -156,6 +165,7 @@ const Login = () => {
         variant='secondary'
         size='lg'
         className='w-full bg-[#FEE500] text-[#3C1E1E] border-none'
+        onClick={handleKakaoLogin}
       >
         <Image
           src='/images/icons/icon_kakao.svg'
