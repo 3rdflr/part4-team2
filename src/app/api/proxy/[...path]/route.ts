@@ -74,7 +74,6 @@ async function handleRequest(method: string, req: Request, path: string[]) {
         : await req.text();
     }
 
-    const url = new URL(req.url);
     const backendUrl = new URL(`${BACKEND_URL}/${pathString}`);
     const url = new URL(req.url);
 
