@@ -15,10 +15,7 @@ export const validations = {
       value: 10,
       message: '열 자 이하로 작성해주세요.',
     },
-    validate: (value: string) => {
-      if (/\s/.test(value)) return '공백 없이 입력해주세요.';
-      return true;
-    },
+    pattern: { value: /^[a-zA-Z0-9가-힣]+$/, message: '공백이나 특수문자 없이 입력해주세요.' },
   },
 
   /**
@@ -29,12 +26,13 @@ export const validations = {
    */
   email: {
     required: '이메일은 필수 입력입니다.',
-    pattern: {
-      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-      message: '이메일 형식으로 작성해 주세요.',
-    },
     validate: (value: string) => {
-      if (/\s/.test(value)) return '공백 없이 입력해주세요.';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        return '이메일 형식으로 작성해 주세요.';
+      }
+      if (!/^\S+$/.test(value)) {
+        return '공백 없이 입력해주세요.';
+      }
       return true;
     },
   },
@@ -51,10 +49,7 @@ export const validations = {
       value: 8,
       message: '8자 이상 입력해주세요.',
     },
-    validate: (value: string) => {
-      if (/\s/.test(value)) return '공백 없이 입력해주세요.';
-      return true;
-    },
+    pattern: { value: /^\S+$/, message: '공백 없이 입력해주세요.' },
   },
 
   /**
