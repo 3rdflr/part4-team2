@@ -5,8 +5,9 @@ import { OverlayProvider } from '@/components/common/OverlayProvider';
 import ToastProvider from '@/components/common/ToastProvider';
 import QueryProvider from '@/providers/QueryProvider';
 import BottomNav from '@/components/home/BottomNav';
-import Nav from '@/components/home/NavContent';
+import Nav from '@/components/common/Nav';
 import './globals.css';
+import Footer from '@/components/common/Footer';
 
 export const metadata: Metadata = {
   title: 'Trivera',
@@ -27,6 +28,7 @@ export default function RootLayout({
             <OverlayProvider>
               <Nav />
               {children}
+              <Footer />
               <BottomNav />
             </OverlayProvider>
           </QueryProvider>

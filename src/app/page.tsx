@@ -50,7 +50,7 @@ export default async function Home({
   );
 
   return (
-    <div className='h-auto'>
+    <div className='h-auto min-h-screen'>
       {!hasParams ? (
         <ActivityList initialActivities={activities} initalCursorId={activitiesData.cursorId} />
       ) : (

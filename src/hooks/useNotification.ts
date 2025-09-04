@@ -22,11 +22,10 @@ export const useDeleteNotification = () => {
     onMutate: async (notificationId) => {
       await queryClient.cancelQueries({ queryKey: ['notifications'] });
 
-      const previousData = queryClient.getQueryData(['notifications']); //백업
+      const previousData = queryClient.getQueryData(['notifications']);
 
       queryClient.setQueryData(['notifications'], (oldData: Notification | undefined) => {
         if (!oldData) return oldData;
-
         return {
           ...oldData,
           notifications: oldData.notifications.filter(
@@ -42,7 +41,8 @@ export const useDeleteNotification = () => {
         queryClient.setQueryData(['notifications'], context.previousData);
       }
     },
-    onSettled: () => {
+    // **수정된 부분: onSettled 대신 onSuccess를 사용합니다.**
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });

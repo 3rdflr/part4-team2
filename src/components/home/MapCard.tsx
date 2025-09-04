@@ -29,16 +29,17 @@ export default function MapCard({ activity, onClose }: MapCardProps) {
         <div
           className={`group absolute left-10 block w-[327px] h-auto rounded-2xl overflow-hidden shadow-lg bg-white transition-transform hover:scale-105 ${isDesktop ? 'top-10 ' : 'top-30'}`}
         >
-          {/* 닫기 버튼 */}
+          {/* 좋아요 버튼 */}
           {user && (
             <button
               type='button'
-              onClick={onClose}
-              className='absolute right-10 z-[200] w-8 h-8 flex items-center justify-center rounded-full transition'
+              className='absolute right-10 z-[200] w-8 h-8 flex items-center justify-center rounded-full transition
+              size-2'
             >
               <ActivityLike activity={activity} userId={user.id} size={20} isButton={true} />
             </button>
           )}
+          {/* 닫기 버튼 */}
           <button
             type='button'
             onClick={onClose}

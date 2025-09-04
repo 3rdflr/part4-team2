@@ -7,6 +7,14 @@ export type ActivitiesSortType = 'most_reviewed' | 'price_asc' | 'price_desc' | 
 // 예약 상태 타입
 export type ReservationStatus = 'pending' | 'confirmed' | 'declined' | 'canceled' | 'completed';
 
+// 예약 상태 텍스트 타입
+export type ReservationStatusText =
+  | '예약 신청'
+  | '예약 승인'
+  | '예약 거절'
+  | '예약 취소'
+  | '체험 완료';
+
 // 컴포넌트에서 사용할 서브 이미지 인터페이스
 export interface SubImage {
   id: number;

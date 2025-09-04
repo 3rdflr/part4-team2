@@ -7,11 +7,14 @@ import { usePathname } from 'next/navigation';
 import { Bell, Search, Heart } from 'lucide-react';
 import { useUserStore } from '@/store/userStore';
 import { useScreenSize } from '@/hooks/useScreenSize';
+import { useNotifications } from '@/hooks/useNotification';
 import Link from 'next/link';
 import Image from 'next/image';
+import NotificationModal from './NotificationModal';
 
 export default function BottomNav() {
   const { isMobile } = useScreenSize();
+  const { data: notificationData } = useNotifications();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [visible, setVisible] = useState(true);
 
@@ -81,12 +84,12 @@ export default function BottomNav() {
             </Link>
             <Link
               className={`${
-                pathname === '/wishlist' ? 'text-primary-300' : 'text-grayscale-500'
+                pathname === '/mypage/wishlist' ? 'text-primary-300' : 'text-grayscale-500'
               } flex flex-col items-center justify-center gap-1`}
               href='/mypage/wishlist'
             >
               <Heart strokeWidth={1} width={20} height={20} />
-              <span>찜목록</span>
+              <span>위시리스트</span>
             </Link>
             <button
               className='text-grayscale-500 dark:text-grayscale-400 flex flex-col items-center justify-center gap-1'
@@ -94,10 +97,14 @@ export default function BottomNav() {
             >
               <Bell strokeWidth={1} width={20} height={20} />
               <span>알림</span>
+              {notificationData?.totalCount && notificationData?.totalCount > 0 ? (
+                <span className='absolute top-4.5 right-34.5 block w-1 h-1 bg-primary-500 rounded-full animate-ping'></span>
+              ) : null}
             </button>
+
             <Link
               className={`${
-                pathname.startsWith('/mypage')
+                pathname.startsWith('/mypage') && pathname !== '/mypage/wishlist'
                   ? 'text-primary-300'
                   : 'text-grayscale-500 dark:text-grayscale-400'
               } flex flex-col items-center justify-center gap-1`}
@@ -114,7 +121,7 @@ export default function BottomNav() {
               <span>프로필</span>
             </Link>
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-              알림 들어갈 예정
+              <NotificationModal />
             </Modal>
           </div>
         ) : (

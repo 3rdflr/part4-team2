@@ -18,3 +18,15 @@ export interface UserSigUp extends User {
   createdAt: string;
   updatedAt: string;
 }
+
+// 내 정보 수정 요청
+export interface UserUpdateRequest {
+  nickname?: string;
+  profileImageUrl?: string;
+  newPassword?: string;
+}
+
+// 내 정보 프로필 이미지 생성 후 응답
+export interface UploadProfileImageResponse {
+  profileImageUrl: string;
+}

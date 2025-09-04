@@ -5,19 +5,22 @@ import { useRouter } from 'next/navigation';
 import { Dropdown, Modal } from 'react-simplified-package';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { useUserStore } from '@/store/userStore';
+import { logout } from '@/lib/utils/logoutUtils';
 import { Bell, Heart, CircleUser, LogOut } from 'lucide-react';
+import { useNotifications } from '@/hooks/useNotification';
 import Link from 'next/link';
 import Image from 'next/image';
+import NotificationModal from './NotificationModal';
 
 export default function LoginSection() {
   const { isDesktop } = useScreenSize();
+  const { data: notificationData } = useNotifications();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const router = useRouter();
 
   const user = useUserStore((state) => state.user);
-  const clearUser = useUserStore((state) => state.clearUser);
 
   if (user) {
     return (
@@ -39,6 +42,7 @@ export default function LoginSection() {
               alt='Profile'
               width={30}
               height={30}
+              className='rounded-full cursor-pointer'
             />
           </Dropdown.Trigger>
           <Dropdown.Menu
@@ -46,39 +50,47 @@ export default function LoginSection() {
             style={{ width: '146px', borderRadius: '15px', borderBottom: '1px solid #e5e7eb' }}
           >
             <button
-              onClick={() => router.push('/mypage')}
-              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title hover:bg-gray-100 transition'
+              onClick={() => router.push('/mypage/user')}
+              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer hover:bg-gray-100 transition'
             >
               <CircleUser strokeWidth={1.5} width={20} height={20} /> 프로필
             </button>
 
             <button
-              onClick={() => router.push('/wishlist')}
-              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title hover:bg-gray-100 transition'
+              onClick={() => router.push('/mypage/wishlist')}
+              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer hover:bg-gray-100 transition'
             >
               <Heart strokeWidth={1.5} width={20} height={20} /> 위시리스트
             </button>
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title hover:bg-gray-100 transition'
+              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer hover:bg-gray-100 transition'
             >
               <Bell strokeWidth={1.5} width={20} height={20} /> 알림
+              {notificationData?.totalCount && notificationData?.totalCount > 0 ? (
+                <span className='ml-5 bg-primary-500 text-white text-[8px] font-bold rounded-full min-w-[18px] h-[18px] flex text-center items-center justify-center px-1'>
+                  {notificationData?.totalCount}
+                </span>
+              ) : null}
             </button>
 
             <button
               onClick={() => {
-                clearUser();
-                localStorage.removeItem('accessToken');
+                logout();
+                router.push('/');
               }}
-              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title hover:bg-gray-100 transition'
+              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer hover:bg-gray-100 transition'
             >
               <LogOut strokeWidth={1.5} width={20} height={20} /> 로그아웃
             </button>
           </Dropdown.Menu>
         </Dropdown>
+        {notificationData?.totalCount && notificationData?.totalCount > 0 ? (
+          <span className='relative bottom-3 right-4 block w-2 h-2 bg-primary-500 rounded-full animate-ping'></span>
+        ) : null}
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          알림 들어갈 예정
+          <NotificationModal />
         </Modal>
       </>
     );
