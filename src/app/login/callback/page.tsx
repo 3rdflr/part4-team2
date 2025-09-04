@@ -8,6 +8,7 @@ import { getUserInfo } from '@/app/api/user';
 import { useUserStore } from '@/store/userStore';
 import { useMutation } from '@tanstack/react-query';
 import { errorToast, successToast } from '@/lib/utils/toastUtils';
+import Spinner from '@/components/common/Spinner';
 
 const KakaoLoginCallbackPage = () => {
   const router = useRouter();
@@ -53,7 +54,12 @@ const KakaoLoginCallbackPage = () => {
     }
   }, [code, loginMutation]);
 
-  return <div className='grid place-items-center mt-20'>카카오 로그인 처리 중...</div>;
+  return (
+    <>
+      <div className='h-[48px]'></div>
+      {Spinner()}
+    </>
+  );
 };
 
 export default KakaoLoginCallbackPage;

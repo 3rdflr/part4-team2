@@ -7,6 +7,7 @@ import { signUpKakao } from '@/app/api/oauth';
 import { useMutation } from '@tanstack/react-query';
 import { errorToast, successToast } from '@/lib/utils/toastUtils';
 import getRandomNickname from '@/lib/utils/randomNicknameUtils';
+import Spinner from '@/components/common/Spinner';
 
 const KakaoSignupCallbackPage = () => {
   const router = useRouter();
@@ -50,7 +51,12 @@ const KakaoSignupCallbackPage = () => {
     }
   }, [code, signupMutation]);
 
-  return <div className='grid place-items-center mt-20'>카카오 회원가입 처리 중...</div>;
+  return (
+    <>
+      <div className='h-[48px]'></div>
+      {Spinner()}
+    </>
+  );
 };
 
 export default KakaoSignupCallbackPage;
