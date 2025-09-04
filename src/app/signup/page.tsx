@@ -200,7 +200,7 @@ const SignUp = () => {
         type='submit'
         variant='secondary'
         size='lg'
-        className='w-full bg-[#FEE500] text-[#3C1E1E] border-none'
+        className='w-full bg-[#FEE500] text-[#3C1E1E] border-none hover:bg-[#FEE500]/60'
         onClick={handleKakaoSingUP}
       >
         <Image
