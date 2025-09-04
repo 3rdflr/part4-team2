@@ -97,7 +97,7 @@ export default function ActivitySheet({
   if (!fullHeight) return null;
 
   return (
-    <div className='flex items-center justify-center'>
+    <div className='flex items-center justify-center z-[110]'>
       <motion.div
         ref={sheetRef}
         className='fixed left-0 right-0 bottom-0 bg-white rounded-t-2xl shadow-lg'

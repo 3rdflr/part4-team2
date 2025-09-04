@@ -18,15 +18,17 @@ export default function Nav() {
   const { isMobile, isTablet } = useScreenSize();
   const [isSearching, setIsSearching] = useState(false);
 
+  const cappedScrollY = useTransform(scrollY, (v) => Math.min(v, 80));
+
   // 스크롤 위치에 따른 애니메이션 원본 값 (raw values)
   const rawStackHeight = useTransform(
-    scrollY,
+    cappedScrollY,
     [0, 40, 80],
     [CATEGORY_H + GAP + SEARCH_H, SEARCH_H, SEARCH_H],
   );
-  const rawCategoryY = useTransform(scrollY, [0, 40, 80], [0, -CATEGORY_H, -CATEGORY_H]);
-  const rawCategoryOpacity = useTransform(scrollY, [0, 40, 80], [1, 0, 0]);
-  const rawSearchY = useTransform(scrollY, [0, 30, 80], [90, 10, 25]);
+  const rawCategoryY = useTransform(cappedScrollY, [0, 40, 80], [0, -CATEGORY_H, -CATEGORY_H]);
+  const rawCategoryOpacity = useTransform(cappedScrollY, [0, 40, 80], [1, 0, 0]);
+  const rawSearchY = useTransform(cappedScrollY, [0, 30, 80], [90, 10, 25]);
 
   // spring easing 적용 (자연스러운 애니메이션)
   const springConfig = { stiffness: 300, damping: 35, mass: 0.5 };

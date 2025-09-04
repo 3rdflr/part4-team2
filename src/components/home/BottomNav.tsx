@@ -64,7 +64,7 @@ export default function BottomNav() {
   return (
     <>
       <motion.nav
-        className='fixed bottom-0 left-0 right-0 flex items-center justify-center w-full h-[82px] z-50 bg-gradient-to-b from-white to-gray-50 border-b border-grayscalescale-20 border-t shadow-md'
+        className='fixed bottom-0 left-0 right-0 flex items-center justify-center w-full h-[82px] z-[120] bg-gradient-to-b from-white to-gray-50 border-b border-grayscalescale-20 border-t shadow-md'
         animate={{ y: visible ? 0 : 82 }} // translate-y 대신 y로
         transition={{ type: 'spring', stiffness: 300, damping: 30 }} // 스프링 효과
       >
