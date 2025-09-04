@@ -42,15 +42,10 @@ async function handleRequest(method: string, req: Request, path: string[]) {
   try {
     const pathString = path.join('/');
 
-    // 🔹 토큰 갱신 전용 엔드포인트 처리
+    // 토큰 갱신 전용 엔드포인트 추가
     if (pathString === 'auth/refresh-token') {
       return handleTokenRefresh(req);
     }
-
-    console.log(`\n===== NEW REQUEST =====`);
-    console.log(`Method: ${method}`);
-    console.log(`Path: ${pathString}`);
-    console.log(`Cookies: ${req.headers.get('cookie')}`);
 
     // 쿠키 파싱
     const cookieHeader = req.headers.get('cookie') || '';
@@ -72,9 +67,6 @@ async function handleRequest(method: string, req: Request, path: string[]) {
 
     // 2. GET 요청이 아닐 경우 요청 본문을 파싱
     const body = method !== 'GET' ? await req.text() : undefined;
-
-    console.log('요청 헤더:', Object.fromEntries(headers.entries()));
-    console.log('요청 body:', body);
 
     const url = new URL(req.url);
     const backendUrl = new URL(`${BACKEND_URL}/${pathString}`);
@@ -162,6 +154,7 @@ async function handleTokenRefresh(req: Request) {
     // 새 토큰들을 쿠키로 설정해서 반환
     const resHeaders = new Headers({ 'Content-Type': 'application/json' });
 
+    // 중복 제거: response.data에서 직접 가져온 값 사용
     const accessCookie = `accessToken=${accessToken}; Path=/; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
     resHeaders.append('Set-Cookie', accessCookie);
 
