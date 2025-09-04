@@ -10,6 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 import { signup } from '../api/user';
 import { AxiosError } from 'axios';
 import { useEffect } from 'react';
+import { errorToast, successToast } from '@/lib/utils/toastUtils';
 
 type FormValues = {
   email: string;
@@ -70,15 +71,13 @@ const SignUp = () => {
     onSuccess: (data) => {
       console.log('회원가입 정보', data);
 
-      // alert => 모달로 변경 예정
-      alert('회원가입이 완료되었습니다');
-
       goToLogin();
+      successToast.run('회원가입이 완료되었습니다');
     },
     onError: (err: unknown) => {
       const error = err as AxiosError<{ message: string }>;
 
-      // alert => 모달로 변경 예정, 리팩토링 때 훅으로 만들 예정
+      // 리팩토링 때 훅으로 만들 예정
       const { status, data } = error.response ?? {};
 
       const emailError = data?.message.includes('이메일');
@@ -95,9 +94,9 @@ const SignUp = () => {
           handled = true;
         }
 
-        if (!handled) alert(data?.message);
+        if (!handled) errorToast.run(data?.message);
       } else {
-        alert(data?.message);
+        errorToast.run(data?.message);
       }
     },
     retry: 0,
@@ -110,6 +109,17 @@ const SignUp = () => {
       nickname: data.nickname,
       password: data.password,
     });
+  };
+
+  // 카카오 회원가입
+  const handleKakaoSingUP = () => {
+    const REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY!;
+    const REDIRECT_URI = encodeURIComponent(process.env.NEXT_PUBLIC_KAKAO_SIGNUP_REDIRECT_URI!);
+
+    // 카카오 회원가입 페이지로 이동
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code&state=signup`;
+
+    window.location.href = kakaoAuthUrl;
   };
 
   return (
@@ -190,7 +200,8 @@ const SignUp = () => {
         type='submit'
         variant='secondary'
         size='lg'
-        className='w-full bg-[#FEE500] text-[#3C1E1E] border-none'
+        className='w-full bg-[#FEE500] text-[#3C1E1E] border-none hover:bg-[#FEE500]/60'
+        onClick={handleKakaoSingUP}
       >
         <Image
           src='/images/icons/icon_kakao.svg'

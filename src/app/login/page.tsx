@@ -12,7 +12,7 @@ import { useUserStore } from '@/store/userStore';
 import { AxiosError } from 'axios';
 import { login } from '../api/auth';
 import { getUserInfo } from '../api/user';
-import { logout } from '@/lib/utils/logoutUtils';
+import { errorToast, successToast } from '@/lib/utils/toastUtils';
 
 type loginFormValues = {
   email: string;
@@ -21,9 +21,6 @@ type loginFormValues = {
 
 const Login = () => {
   const setUser = useUserStore((state) => state.setUser);
-  const user = useUserStore((state) => state.user);
-  // const clearUser = useUserStore((state) => state.clearUser);
-
   const router = useRouter();
 
   const {
@@ -46,6 +43,27 @@ const Login = () => {
   const allFields = watch();
   const isFilled = Object.values(allFields).every(Boolean);
 
+  // 로그인 성공 시 다이랙트 설정
+  // const params = new URLSearchParams(window.location.search);
+  // const redirectUrl = params.get('redirect');
+  // const source = params.get('source');
+
+  // const handleLoginSuccess = () => {
+  //   console.log(source);
+  //   alert(source);
+
+  //   if (source === 'signup') {
+  //     // 회원가입 페이지를 통해 왔다면 무조건 메인 페이지로 이동
+  //     router.push('/');
+  //   } else if (redirectUrl) {
+  //     // 리다이렉트 URL이 있다면 해당 페이지로 이동
+  //     router.push(redirectUrl);
+  //   } else {
+  //     // 리다이렉트 URL이 없다면 기본 페이지(메인)로 이동
+  //     router.push('/');
+  //   }
+  // };
+
   // 로그인 요청 mutation
   const mutation = useMutation({
     mutationFn: login,
@@ -54,9 +72,11 @@ const Login = () => {
       const user = await getUserInfo();
       setUser(user);
 
-      alert(`login 성공`);
-
       router.push('/');
+
+      // handleLoginSuccess();
+
+      successToast.run(`${user.nickname}님 환영합니다!`);
     },
     onError: (err: unknown) => {
       const error = err as AxiosError<{ message: string }>;
@@ -85,13 +105,23 @@ const Login = () => {
           }
         }
 
-        if (!handled) alert(data?.message);
+        if (!handled) errorToast.run(data?.message);
       } else {
-        alert(data?.message);
+        errorToast.run(data?.message);
       }
     },
     retry: 0,
   });
+
+  const handleKakaoLogin = () => {
+    const REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY!;
+    const REDIRECT_URI = encodeURIComponent(process.env.NEXT_PUBLIC_KAKAO_LOGIN_REDIRECT_URI!);
+
+    // 카카오 로그인 페이지로 이동
+    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+
+    window.location.href = kakaoAuthUrl; // 카카오 로그인 페이지로 이동
+  };
 
   // 폼 제출
   const onSubmit = (data: loginFormValues) => {
@@ -155,7 +185,8 @@ const Login = () => {
         type='submit'
         variant='secondary'
         size='lg'
-        className='w-full bg-[#FEE500] text-[#3C1E1E] border-none'
+        className='w-full bg-[#FEE500] text-[#3C1E1E] border-none hover:bg-[#FEE500]/60'
+        onClick={handleKakaoLogin}
       >
         <Image
           src='/images/icons/icon_kakao.svg'
@@ -177,22 +208,6 @@ const Login = () => {
           회원가입하기
         </span>
       </p>
-
-      {/* 임시 */}
-      <div className='mt-10 border border-[var(--primary-500)] p-5'>
-        <div className='grid gap-1 mb-4'>
-          <h1 className='font-bold text-lg'>로그인 정보 </h1>
-          {user ? (
-            <>
-              <span>ID : {user.id}</span>
-              <span>닉네임 : {user.nickname}</span>
-            </>
-          ) : (
-            <p>로그인 정보가 현재 없습니다.</p>
-          )}
-        </div>
-        <Button onClick={logout}>로그아웃 (임시)</Button>
-      </div>
     </div>
   );
 };
