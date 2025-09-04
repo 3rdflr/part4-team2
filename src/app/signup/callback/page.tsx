@@ -2,10 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { AxiosError } from 'axios';
 import { signUpKakao } from '@/app/api/oauth';
 import { useMutation } from '@tanstack/react-query';
 import { errorToast, successToast } from '@/lib/utils/toastUtils';
-import { AxiosError } from 'axios';
+import getRandomNickname from '@/lib/utils/randomNicknameUtils';
 
 const KakaoSignupCallbackPage = () => {
   const router = useRouter();
@@ -18,8 +19,7 @@ const KakaoSignupCallbackPage = () => {
   const signupMutation = useMutation({
     mutationFn: async () => {
       if (!code) throw new Error('카카오 인증 코드가 없습니다.');
-      // const nickname = await getKakaoNickname(code);
-      const nickname = '카카오톡 유저';
+      const nickname = getRandomNickname();
 
       return await signUpKakao({ token: code, redirectUri, nickname });
     },
@@ -54,38 +54,3 @@ const KakaoSignupCallbackPage = () => {
 };
 
 export default KakaoSignupCallbackPage;
-
-// 닉네임 가져오기 함수 (회원가입용)
-// const getKakaoNickname = async (code: string) => {
-//   const body = new URLSearchParams({
-//     grant_type: 'authorization_code',
-//     client_id: process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY!,
-//     redirect_uri: redirectUri,
-//     code,
-//   }).toString();
-
-//   console.log('Kakao Token Request Body:', body);
-//   console.log('Redirect URI:', redirectUri);
-//   console.log('Code:', code);
-
-//   const tokenRes = await fetch('https://kauth.kakao.com/oauth/token', {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
-//     body,
-//   });
-
-//   if (!tokenRes.ok) throw new Error('카카오 access token 발급 실패');
-//   const { access_token } = await tokenRes.json();
-
-//   const profileRes = await fetch('https://kapi.kakao.com/v2/user/me', {
-//     headers: {
-//       Authorization: `Bearer ${access_token}`,
-//       'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-//     },
-//   });
-
-//   if (!profileRes.ok) throw new Error('카카오 사용자 정보 조회 실패');
-//   const profileData = await profileRes.json();
-
-//   return profileData.kakao_account?.profile?.nickname ?? 'KakaoUser';
-// };
