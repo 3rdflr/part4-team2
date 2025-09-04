@@ -12,7 +12,6 @@ import { useUserStore } from '@/store/userStore';
 import { AxiosError } from 'axios';
 import { login } from '../api/auth';
 import { getUserInfo } from '../api/user';
-import { logout } from '@/lib/utils/logoutUtils';
 import { errorToast, successToast } from '@/lib/utils/toastUtils';
 
 type loginFormValues = {
@@ -22,7 +21,6 @@ type loginFormValues = {
 
 const Login = () => {
   const setUser = useUserStore((state) => state.setUser);
-  const user = useUserStore((state) => state.user);
   const router = useRouter();
 
   const {
@@ -210,22 +208,6 @@ const Login = () => {
           회원가입하기
         </span>
       </p>
-
-      {/* 임시 */}
-      <div className='mt-10 border border-[var(--primary-500)] p-5'>
-        <div className='grid gap-1 mb-4'>
-          <h1 className='font-bold text-lg'>로그인 정보 </h1>
-          {user ? (
-            <>
-              <span>ID : {user.id}</span>
-              <span>닉네임 : {user.nickname}</span>
-            </>
-          ) : (
-            <p>로그인 정보가 현재 없습니다.</p>
-          )}
-        </div>
-        <Button onClick={logout}>로그아웃 (임시)</Button>
-      </div>
     </div>
   );
 };
