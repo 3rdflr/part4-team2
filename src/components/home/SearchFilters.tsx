@@ -1,4 +1,3 @@
-// src/components/SearchFilters.tsx
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -11,26 +10,10 @@ import {
   useTransform,
   MotionValue,
 } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, SearchIcon } from 'lucide-react';
 import PriceFilter from './PriceFilter';
 import { PLACES } from './Constants';
 import Image from 'next/image';
-
-const SearchIcon = () => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-    strokeWidth='2'
-    strokeLinecap='round'
-    strokeLinejoin='round'
-    className='w-5 h-5'
-  >
-    <circle cx='11' cy='11' r='8'></circle>
-    <line x1='21' y1='21' x2='16.65' y2='16.65'></line>
-  </svg>
-);
 
 type Props = {
   scrollY: MotionValue<number>;
@@ -68,34 +51,34 @@ export default function SearchFilters({ scrollY, isSearching, setIsSearching }: 
   const highlightX = useMotionValue(0);
   const highlightW = useMotionValue(0);
 
-  const rawWidth = useTransform(scrollY, [0, 50], [814, 340]);
-  const rawHeight = useTransform(scrollY, [0, 50], [64, 46]);
+  const rawWidth = useTransform(scrollY, [0, 1], [814, 340]);
+  const rawHeight = useTransform(scrollY, [0, 1], [64, 46]);
   const width = useMotionValue(814);
   const height = useMotionValue(64);
 
   const [isShrunk, setIsShrunk] = useState(false);
 
+  // 🔹 DOM 기반 highlight 업데이트
   const updateHighlight = () => {
-    const totalSections = sections.length;
-    let index = -1;
+    if (!containerRef.current) return;
 
-    if (hoverSection) {
-      index = sections.findIndex((s) => s === hoverSection);
-    } else if (openedSection) {
-      index = sections.findIndex((s) => s === openedSection);
-    }
+    let target: HTMLDivElement | null = null;
+    if (hoverSection) target = sectionRefs[hoverSection].current;
+    else if (openedSection) target = sectionRefs[openedSection].current;
 
-    if (index === -1) {
+    if (!target) {
       animate(highlightW, 0, { type: 'spring', stiffness: 500, damping: 30 });
       return;
     }
 
-    const containerWidth = width.get();
-    const secWidth = containerWidth / totalSections;
-    const left = index * secWidth;
+    const targetRect = target.getBoundingClientRect();
+    const containerRect = containerRef.current.getBoundingClientRect();
+
+    const left = targetRect.left - containerRect.left;
+    const widthValue = targetRect.width;
 
     animate(highlightX, left, { type: 'spring', stiffness: 500, damping: 30 });
-    animate(highlightW, secWidth, { type: 'spring', stiffness: 500, damping: 30 });
+    animate(highlightW, widthValue, { type: 'spring', stiffness: 500, damping: 30 });
   };
 
   useEffect(() => {
@@ -184,11 +167,11 @@ export default function SearchFilters({ scrollY, isSearching, setIsSearching }: 
       />
       <motion.div
         style={{ left: highlightX, width: highlightW }}
-        className='absolute top-0 bottom-0 z-10 bg-white rounded-full shadow-md pointer-events-none'
+        className={`absolute top-0 bottom-0 z-10 shadow-md rounded-full pointer-events-none ${isSearching ? 'bg-white' : 'bg-grayscale-50'}`}
       />
 
       <div className='relative z-20 w-full h-full grid overflow-auto grid-cols-[1fr_1fr_1fr]'>
-        {sections.map((sec, idx) => {
+        {sections.map((sec) => {
           const ref = sectionRefs[sec];
           const isKeyword = sec === 'keyword';
 
@@ -282,13 +265,9 @@ export default function SearchFilters({ scrollY, isSearching, setIsSearching }: 
                     `}
                     aria-label='검색'
                   >
-                    <SearchIcon />
+                    <SearchIcon width={24} height={24} />
                   </button>
                 </>
-              )}
-
-              {!isSearching && idx < sections.length - 1 && (
-                <div className='absolute top-2 bottom-2 right-0 w-px bg-grayscale-100' />
               )}
             </div>
           );

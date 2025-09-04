@@ -66,15 +66,23 @@ async function handleRequest(method: string, req: Request, path: string[]) {
     }
 
     // 2. GET 요청이 아닐 경우 요청 본문을 파싱
-    const body = method !== 'GET' ? await req.text() : undefined;
+    let body = undefined;
+    if (method !== 'GET') {
+      const contentType = req.headers.get('content-type') || '';
+      body = contentType.includes('multipart/form-data')
+        ? Buffer.from(await req.arrayBuffer())
+        : await req.text();
+    }
 
     const backendUrl = new URL(`${BACKEND_URL}/${pathString}`);
+    const url = new URL(req.url);
 
     // 3. Axios 요청 생성
     const response = await axios({
       method,
       url: backendUrl.toString(),
       headers: Object.fromEntries(headers.entries()),
+      params: Object.fromEntries(url.searchParams.entries()),
       data: body,
       validateStatus: () => true,
       withCredentials: true,

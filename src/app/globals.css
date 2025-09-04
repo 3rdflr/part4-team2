@@ -94,6 +94,13 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --input-bg: oklch(100% 0 0);
+  /* 뱃지 컬러 */
+  --badge-coral-light: #fcecea;
+  --badge-coral-dark: #f96767;
+  --badge-blue-light: #e5f3ff;
+  --badge-blue-dark: #0085ff;
+  --badge-green-light: #e1f9dd;
+  --badge-green-dark: #37ae00;
 }
 
 @theme inline {
