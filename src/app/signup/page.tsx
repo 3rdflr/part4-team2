@@ -10,6 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 import { signup } from '../api/user';
 import { AxiosError } from 'axios';
 import { useEffect } from 'react';
+import { errorToast, successToast } from '@/lib/utils/toastUtils';
 
 type FormValues = {
   email: string;
@@ -70,15 +71,13 @@ const SignUp = () => {
     onSuccess: (data) => {
       console.log('회원가입 정보', data);
 
-      // alert => 모달로 변경 예정
-      alert('회원가입이 완료되었습니다');
-
       goToLogin();
+      successToast.run('회원가입이 완료되었습니다');
     },
     onError: (err: unknown) => {
       const error = err as AxiosError<{ message: string }>;
 
-      // alert => 모달로 변경 예정, 리팩토링 때 훅으로 만들 예정
+      // 리팩토링 때 훅으로 만들 예정
       const { status, data } = error.response ?? {};
 
       const emailError = data?.message.includes('이메일');
@@ -95,9 +94,9 @@ const SignUp = () => {
           handled = true;
         }
 
-        if (!handled) alert(data?.message);
+        if (!handled) errorToast.run(data?.message);
       } else {
-        alert(data?.message);
+        errorToast.run(data?.message);
       }
     },
     retry: 0,

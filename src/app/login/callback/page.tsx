@@ -28,8 +28,8 @@ const KakaoLoginCallbackPage = () => {
       const user = await getUserInfo();
       setUser(user);
 
-      successToast.run(`${user.nickname}님 환영합니다!`);
       router.replace('/');
+      successToast.run(`${user.nickname}님 환영합니다!`);
     },
     onError: (err) => {
       const error = err as AxiosError<{ message: string }>;

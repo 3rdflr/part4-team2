@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useUserStore } from '@/store/userStore';
 import { BASE_URL } from './config';
+import { errorToast } from '@/lib/utils/toastUtils';
 
 interface FailedRequest {
   resolve: (value?: unknown) => void;
@@ -70,9 +71,8 @@ axiosInstance.interceptors.response.use(
 
         failedQueue = []; // 큐 초기화
 
-        // sessionStorage에 메시지 저장하고 즉시 페이지 이동
-        sessionStorage.setItem('loginMessage', '세션이 만료되었습니다.');
         window.location.href = '/login';
+        errorToast.run('로그인 세션이 만료되었습니다.');
 
         return Promise.reject(refreshError);
       } finally {
