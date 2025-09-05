@@ -13,6 +13,7 @@ import { AxiosError } from 'axios';
 import { login } from '../api/auth';
 import { getUserInfo } from '../api/user';
 import { errorToast, successToast } from '@/lib/utils/toastUtils';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 
 type loginFormValues = {
   email: string;
@@ -22,6 +23,7 @@ type loginFormValues = {
 const Login = () => {
   const setUser = useUserStore((state) => state.setUser);
   const router = useRouter();
+  const { isBlocked } = useAuthRedirect();
 
   const {
     register,
@@ -130,6 +132,9 @@ const Login = () => {
       password: data.password,
     });
   };
+
+  // 로그인 상태일 때 진입 막음
+  if (isBlocked) return null;
 
   return (
     <div className=' m-auto grid place-items-center px-[24px] max-w-[674px]'>
