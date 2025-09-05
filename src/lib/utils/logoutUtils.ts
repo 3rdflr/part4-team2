@@ -2,6 +2,9 @@ import { useUserStore } from '@/store/userStore';
 import { errorToast, successToast } from './toastUtils';
 
 export async function logout() {
+  const { user } = useUserStore.getState();
+  if (!user) return;
+
   try {
     await fetch('/api/logout', { method: 'POST' });
     useUserStore.getState().clearUser();
