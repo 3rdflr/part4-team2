@@ -88,8 +88,13 @@ axiosInstance.interceptors.response.use(
         errorToast.run('로그인 세션이 만료되었습니다.');
 
         setTimeout(() => {
-          window.location.href = '/login';
-        }, 100);
+          const currentPath = window.location.pathname;
+
+          // 로그인 페이지나 메인 페이지에 있을 때 이동X
+          if (currentPath !== '/') {
+            window.location.href = '/login';
+          }
+        }, 800);
 
         return Promise.reject(refreshError);
       } finally {
