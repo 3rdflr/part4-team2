@@ -90,7 +90,7 @@ axiosInstance.interceptors.response.use(
         setTimeout(() => {
           const currentPath = window.location.pathname;
 
-          // 로그인 페이지나 메인 페이지에 있을 때 이동X
+          // 메인 페이지에 있을 때 이동X
           if (currentPath !== '/') {
             window.location.href = '/login';
           }
