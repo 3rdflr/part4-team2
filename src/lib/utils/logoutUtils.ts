@@ -6,9 +6,20 @@ export async function logout() {
   if (!user) return;
 
   try {
-    await fetch('/api/logout', { method: 'POST' });
+    const res = await fetch('/api/logout', { method: 'POST' });
+
+    if (!res.ok) {
+      throw new Error(`서버 로그아웃 실패 (status: ${res.status})`);
+    }
+
+    const data = await res.json();
+    if (data.message === 'Already logged out') {
+      successToast.run('이미 로그아웃 상태 입니다.');
+    } else {
+      successToast.run('로그아웃 되었습니다.');
+    }
+
     useUserStore.getState().clearUser();
-    successToast.run('로그아웃 되었습니다');
   } catch (error) {
     errorToast.run('로그아웃 실패하였습니다. 잠시후 시도해주세요');
 
