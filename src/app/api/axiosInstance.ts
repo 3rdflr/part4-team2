@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useUserStore } from '@/store/userStore';
-import { BASE_URL } from './config';
 import { errorToast } from '@/lib/utils/toastUtils';
+import { BASE_URL } from './config';
 
 interface FailedRequest {
   resolve: (value?: unknown) => void;
@@ -41,6 +41,14 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
+      // 로그인하지 않은 경우 refresh 토큰 갱신 시도하지 않음
+      const user = useUserStore.getState().user;
+      console.log(user);
+      if (!user) {
+        console.log('[Interceptor] Guest user, skip refresh');
+        return Promise.reject(error);
+      }
+
       // 클라이언트일 때만 큐 처리
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -53,9 +61,16 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        // 인터셉터 없는 인스턴스로 refresh-token 호출
+        const plainAxios = axios.create({
+          baseURL: BASE_URL,
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' },
+        });
+
         // refreshToken은 HttpOnly라서 클라이언트에서 못 읽음
         // 프록시 서버에서 처리하도록 요청
-        await axiosInstance.post('/auth/refresh-token');
+        await plainAxios.post('/auth/refresh-token');
 
         processQueue(null);
 
@@ -66,13 +81,15 @@ axiosInstance.interceptors.response.use(
         processQueue(refreshError);
 
         // 쿠키 삭제 + 유저 정보 삭제
-        fetch('/api/logout', { method: 'POST' });
+        fetch('/api/logout', { method: 'POST' }).catch(() => {});
+
         useUserStore.getState().clearUser();
 
-        failedQueue = []; // 큐 초기화
-
-        window.location.href = '/login';
         errorToast.run('로그인 세션이 만료되었습니다.');
+
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 100);
 
         return Promise.reject(refreshError);
       } finally {

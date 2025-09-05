@@ -134,26 +134,40 @@ async function handleRequest(method: string, req: Request, path: string[]) {
 
 // 토큰 갱신 전용 처리 함수
 async function handleTokenRefresh(req: Request) {
+  console.log('🔄 Token refresh started');
+
   try {
     // refreshToken 추출 (서버에서만 HttpOnly 쿠키 읽을 수 있음)
     const cookieHeader = req.headers.get('cookie') || '';
     const cookies = parse(cookieHeader);
     const refreshToken = cookies.refreshToken;
 
+    console.log('Refresh token exists:', !!refreshToken);
+
     if (!refreshToken) {
+      console.log('❌ No refresh token found');
       return new NextResponse(JSON.stringify({ error: 'No refresh token' }), { status: 401 });
     }
 
     // 백엔드에 토큰 갱신 요청
     const response = await axios.post(
       `${BACKEND_URL}/auth/tokens`,
-      { refreshToken },
-      { validateStatus: () => true, headers: { 'Content-Type': 'application/json' } },
+      {},
+      {
+        validateStatus: () => true,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${refreshToken}` },
+      },
     );
 
-    if (response.status !== 200) {
+    console.log('Backend response status:', response.status);
+    console.log('New access token received:', !!response.data?.accessToken);
+
+    if (response.status !== 200 && response.status !== 201) {
+      console.log('❌ Token refresh failed');
       return new NextResponse(JSON.stringify(response.data), { status: response.status });
     }
+
+    console.log('✅ Token refresh successful');
 
     const { accessToken, refreshToken: newRefreshToken } = response.data;
 
@@ -164,13 +178,11 @@ async function handleTokenRefresh(req: Request) {
     const accessCookie = `accessToken=${accessToken}; Path=/; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
     resHeaders.append('Set-Cookie', accessCookie);
 
-    // refreshToken이 새로 발급된 경우에만 업데이트?
-    const refreshCookie = `refreshToken=${newRefreshToken}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
-    resHeaders.append('Set-Cookie', refreshCookie);
-    // if (newRefreshToken && newRefreshToken !== refreshToken) {
-    //   const refreshCookie = `refreshToken=${newRefreshToken}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
-    //   resHeaders.append('Set-Cookie', refreshCookie);
-    // }
+    // 새 refreshToken이 있고 기존과 다를 때만 쿠키 업데이트
+    if (newRefreshToken && newRefreshToken !== refreshToken) {
+      const refreshCookie = `refreshToken=${newRefreshToken}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+      resHeaders.append('Set-Cookie', refreshCookie);
+    }
 
     return new NextResponse(
       JSON.stringify({ success: true, tokens: { accessToken, refreshToken: newRefreshToken } }),
