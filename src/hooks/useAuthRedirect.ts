@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 
 /**
  *
@@ -12,11 +12,9 @@ export const useAuthRedirect = (redirectTo = '/') => {
   const router = useRouter();
   const { user } = useUserStore();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (user) {
       router.replace(redirectTo);
     }
   }, [user, router, redirectTo]);
-
-  return { isBlocked: !!user }; // 렌더링에서 깜빡임 방지
 };

@@ -23,7 +23,6 @@ type FormValues = {
 
 const SignUp = () => {
   const router = useRouter();
-  const { isBlocked } = useAuthRedirect();
 
   const goToLogin = () => {
     router.push('/login');
@@ -124,10 +123,10 @@ const SignUp = () => {
   };
 
   // 로그인 상태일 때 진입 막음
-  if (isBlocked) return null;
+  useAuthRedirect();
 
   return (
-    <div className=' m-auto grid place-items-center px-[24px] max-w-[674px]'>
+    <div className='m-auto grid place-items-center px-[24px] max-w-[674px] mt-15'>
       <Image
         src='/images/logo_large.svg'
         width={150}
