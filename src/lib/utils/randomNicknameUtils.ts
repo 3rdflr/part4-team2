@@ -74,7 +74,7 @@ const getRandomNumber = (max: number) => {
 };
 
 const getRandomNickname = (): string => {
-  return `${getRandomElement(adjectives)} ${getRandomElement(nouns)}${getRandomNumber(99)}`;
+  return `${getRandomElement(adjectives)}${getRandomElement(nouns)}${getRandomNumber(99)}`;
 };
 
 export default getRandomNickname;
