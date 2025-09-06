@@ -43,9 +43,7 @@ axiosInstance.interceptors.response.use(
 
       // 로그인하지 않은 경우 refresh 토큰 갱신 시도하지 않음
       const user = useUserStore.getState().user;
-      console.log(user);
       if (!user) {
-        console.log('[Interceptor] Guest user, skip refresh');
         return Promise.reject(error);
       }
 
