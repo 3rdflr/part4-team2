@@ -31,8 +31,7 @@ const Login = () => {
     setError,
     formState: { isSubmitted, isSubmitting, isValid, errors },
   } = useForm<loginFormValues>({
-    mode: 'onSubmit',
-    reValidateMode: 'onChange',
+    mode: 'onTouched',
     defaultValues: {
       email: '',
       password: '',

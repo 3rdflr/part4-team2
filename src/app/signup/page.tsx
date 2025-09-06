@@ -36,8 +36,7 @@ const SignUp = () => {
     trigger,
     formState: { isSubmitted, isSubmitting, isValid, errors },
   } = useForm<FormValues>({
-    mode: 'onSubmit',
-    reValidateMode: 'onChange',
+    mode: 'onTouched',
     defaultValues: {
       email: '',
       password: '',
