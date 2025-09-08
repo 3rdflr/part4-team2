@@ -19,6 +19,8 @@ import {
 import { redirectToKakaoAuth } from '@/components/pages/auth/kakao';
 import LogoImage from '@/components/pages/auth/LogoImage';
 import KakaoButton from '@/components/pages/auth/KakaoButton';
+import Divider from '@/components/pages/auth/Divider';
+import AuthHelperText from '@/components/pages/auth/AuthHelperText';
 
 type FormValues = {
   email: string;
@@ -109,23 +111,14 @@ const SignUp = () => {
         <AgreeCheckbox />
       </AuthForm>
 
-      <div className='flex my-[30px] w-full items-center'>
-        <hr className='w-full flex-grow' />
-        <span className='mx-4 text-[16px] text-[var(--grayscale-700)] w-full text-center whitespace-nowrap cursor-default'>
-          SNS 계정으로 회원가입하기
-        </span>
-        <hr className='w-full flex-grow' />
-      </div>
+      {/* 구분선 */}
+      <Divider text='SNS 계정으로 회원가입하기' />
 
       {/* 카카오 회원가입 버튼 */}
       <KakaoButton type='signup' onClick={() => redirectToKakaoAuth('signup')} />
 
-      <p className='text-[var(--grayscale-400)] mt-[30px] cursor-default'>
-        회원이신가요?
-        <span onClick={goToLogin} className='underline cursor-pointer ml-1'>
-          로그인하기
-        </span>
-      </p>
+      {/* 로그인 페이지로 다이랙트 */}
+      <AuthHelperText directUrl='login' />
     </div>
   );
 };

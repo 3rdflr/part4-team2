@@ -15,6 +15,8 @@ import { AuthForm, EmailInput, PasswordInput } from '@/components/pages/auth/Aut
 import { redirectToKakaoAuth } from '@/components/pages/auth/kakao';
 import LogoImage from '@/components/pages/auth/LogoImage';
 import KakaoButton from '@/components/pages/auth/KakaoButton';
+import Divider from '@/components/pages/auth/Divider';
+import AuthHelperText from '@/components/pages/auth/AuthHelperText';
 
 type FormValues = {
   email: string;
@@ -125,29 +127,14 @@ const Login = () => {
         <PasswordInput />
       </AuthForm>
 
-      {/*  */}
-      <div className='flex my-[30px] w-full items-center'>
-        <hr className='w-full flex-grow' />
-        <span className='mx-4 text-[16px] text-[var(--grayscale-700)] text-center whitespace-nowrap cursor-default'>
-          or
-        </span>
-        <hr className='w-full flex-grow' />
-      </div>
+      {/* 구분선 */}
+      <Divider text='or' />
 
       {/* 카카오 회원가입 버튼 */}
       <KakaoButton type='login' onClick={() => redirectToKakaoAuth('login')} />
 
-      <p className='text-[var(--grayscale-400)] mt-[30px] cursor-default'>
-        회원이 아니신가요?
-        <span
-          onClick={() => {
-            router.push('/signup');
-          }}
-          className='underline cursor-pointer ml-1'
-        >
-          회원가입하기
-        </span>
-      </p>
+      {/* 회원가입 페이지로 다이랙트 */}
+      <AuthHelperText directUrl='signup' />
     </div>
   );
 };
