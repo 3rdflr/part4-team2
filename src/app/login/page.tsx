@@ -1,10 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
+
 import { useMutation } from '@tanstack/react-query';
 import { useUserStore } from '@/store/userStore';
 import { AxiosError } from 'axios';
@@ -12,8 +11,10 @@ import { login } from '../api/auth';
 import { getUserInfo } from '../api/user';
 import { errorToast, successToast } from '@/lib/utils/toastUtils';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
-import { AuthForm, EmailInput, PasswordInput } from '@/components/pages/auth/authInputValidations';
+import { AuthForm, EmailInput, PasswordInput } from '@/components/pages/auth/AuthFormValidations';
 import { redirectToKakaoAuth } from '@/components/pages/auth/kakao';
+import LogoImage from '@/components/pages/auth/LogoImage';
+import KakaoButton from '@/components/pages/auth/KakaoButton';
 
 type FormValues = {
   email: string;
@@ -115,20 +116,16 @@ const Login = () => {
 
   return (
     <div className=' m-auto grid place-items-center px-[24px] max-w-[674px] mt-15'>
-      <Image
-        src='/images/logo_large.svg'
-        width={150}
-        height={200}
-        alt='Trivera'
-        className='object-contain w-auto h-auto mb-[60px] cursor-pointer'
-        onClick={() => {
-          router.push('/');
-        }}
-      />
-      <AuthForm methods={methods} onSubmit={onSubmit} submitLabel='로그인'>
+      {/* 로고 이미지, 메인 바로가기 */}
+      <LogoImage />
+
+      {/* 로그인 폼 */}
+      <AuthForm methods={methods} onSubmit={onSubmit} type='login'>
         <EmailInput />
         <PasswordInput />
       </AuthForm>
+
+      {/*  */}
       <div className='flex my-[30px] w-full items-center'>
         <hr className='w-full flex-grow' />
         <span className='mx-4 text-[16px] text-[var(--grayscale-700)] text-center whitespace-nowrap cursor-default'>
@@ -136,22 +133,10 @@ const Login = () => {
         </span>
         <hr className='w-full flex-grow' />
       </div>
-      <Button
-        type='submit'
-        variant='secondary'
-        size='lg'
-        className='w-full bg-[#FEE500] text-[#3C1E1E] border-none hover:bg-[#FEE500]/60'
-        onClick={() => redirectToKakaoAuth('login')}
-      >
-        <Image
-          src='/images/icons/icon_kakao.svg'
-          width={24}
-          height={24}
-          alt='카카오톡 아이콘'
-          className='w-6 h-6 object-contain'
-        />
-        카카오 로그인
-      </Button>
+
+      {/* 카카오 회원가입 버튼 */}
+      <KakaoButton type='login' onClick={() => redirectToKakaoAuth('login')} />
+
       <p className='text-[var(--grayscale-400)] mt-[30px] cursor-default'>
         회원이 아니신가요?
         <span

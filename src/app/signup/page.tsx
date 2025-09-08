@@ -1,8 +1,7 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import Image from 'next/image';
+
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { signup } from '../api/user';
@@ -16,8 +15,10 @@ import {
   PasswordInput,
   ConfirmPasswordInput,
   AgreeCheckbox,
-} from '@/components/pages/auth/authInputValidations';
+} from '@/components/pages/auth/AuthFormValidations';
 import { redirectToKakaoAuth } from '@/components/pages/auth/kakao';
+import LogoImage from '@/components/pages/auth/LogoImage';
+import KakaoButton from '@/components/pages/auth/KakaoButton';
 
 type FormValues = {
   email: string;
@@ -96,18 +97,11 @@ const SignUp = () => {
 
   return (
     <div className='m-auto grid place-items-center px-[24px] max-w-[674px] mt-15'>
-      <Image
-        src='/images/logo_large.svg'
-        width={150}
-        height={200}
-        alt='Trivera'
-        className='object-contain w-auto h-auto mb-[60px] cursor-pointer'
-        onClick={() => {
-          router.push('/');
-        }}
-      />
+      {/* 로고 이미지, 메인 바로가기 */}
+      <LogoImage />
 
-      <AuthForm methods={methods} onSubmit={onSubmit} submitLabel='회원가입'>
+      {/* 회원가입 폼 */}
+      <AuthForm methods={methods} onSubmit={onSubmit} type='signup'>
         <EmailInput />
         <NicknameInput />
         <PasswordInput />
@@ -122,22 +116,10 @@ const SignUp = () => {
         </span>
         <hr className='w-full flex-grow' />
       </div>
-      <Button
-        type='submit'
-        variant='secondary'
-        size='lg'
-        className='w-full bg-[#FEE500] text-[#3C1E1E] border-none hover:bg-[#FEE500]/60'
-        onClick={() => redirectToKakaoAuth('signup')}
-      >
-        <Image
-          src='/images/icons/icon_kakao.svg'
-          width={24}
-          height={24}
-          alt='카카오톡 아이콘'
-          className='w-6 h-6 object-contain'
-        />
-        카카오 회원가입
-      </Button>
+
+      {/* 카카오 회원가입 버튼 */}
+      <KakaoButton type='signup' onClick={() => redirectToKakaoAuth('signup')} />
+
       <p className='text-[var(--grayscale-400)] mt-[30px] cursor-default'>
         회원이신가요?
         <span onClick={goToLogin} className='underline cursor-pointer ml-1'>

@@ -26,7 +26,7 @@ type FormValues = {
 type AuthFormProps<T extends FieldValues> = {
   methods: UseFormReturn<T>;
   onSubmit: SubmitHandler<T>;
-  submitLabel?: string;
+  type: 'login' | 'signup';
   children: React.ReactNode;
 } & Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onSubmit'>;
 
@@ -166,12 +166,14 @@ export const AuthForm = <T extends FieldValues>({
   methods,
   onSubmit,
   children,
-  submitLabel = '제출',
+  type,
 }: AuthFormProps<T>) => {
   // 제출 버튼 활성화/비활성화 제어, defaultValues으로 초기 값 false 설정
   // isFilled: 제출 버튼 활성화 제어용
   const allFields = methods.watch();
   const isFilled = Object.values(allFields).every(Boolean);
+
+  const submitLabel = type === 'signup' ? '회원가입' : '로그인';
 
   return (
     <FormProvider {...methods}>
