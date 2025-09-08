@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import clsx from 'clsx';
 
 interface ConfirmActionModalProps {
-  title?: string;
+  title?: string | React.ReactNode;
   exitText?: string;
   actionText?: string;
   buttons?: React.ReactNode;

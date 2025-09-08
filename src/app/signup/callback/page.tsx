@@ -6,6 +6,7 @@ import { AxiosError } from 'axios';
 import { signUpKakao } from '@/app/api/oauth';
 import { useMutation } from '@tanstack/react-query';
 import { errorToast, successToast } from '@/lib/utils/toastUtils';
+import { redirectToKakaoAuth } from '@/components/pages/auth/kakao';
 import getRandomNickname from '@/lib/utils/randomNicknameUtils';
 import Spinner from '@/components/common/Spinner';
 
@@ -25,8 +26,9 @@ const KakaoSignupCallbackPage = () => {
       return await signUpKakao({ token: code, redirectUri, nickname });
     },
     onSuccess: async () => {
-      successToast.run('Trivera 카카오 가입이 완료되었습니다!');
-      router.replace('/login');
+      successToast.run('Trivera 카카오 회원가입이 완료되었습니다!');
+      redirectToKakaoAuth('login');
+      router.replace('/');
     },
     onError: (err) => {
       const error = err as AxiosError<{ message: string }>;

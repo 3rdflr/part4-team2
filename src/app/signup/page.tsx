@@ -17,6 +17,7 @@ import {
   ConfirmPasswordInput,
   AgreeCheckbox,
 } from '@/components/pages/auth/authInputValidations';
+import { redirectToKakaoAuth } from '@/components/pages/auth/kakao';
 
 type FormValues = {
   email: string;
@@ -90,17 +91,6 @@ const SignUp = () => {
     });
   };
 
-  // 카카오 회원가입
-  const handleKakaoSingUP = () => {
-    const REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY!;
-    const REDIRECT_URI = encodeURIComponent(process.env.NEXT_PUBLIC_KAKAO_SIGNUP_REDIRECT_URI!);
-
-    // 카카오 회원가입 페이지로 이동
-    const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code&state=signup`;
-
-    window.location.href = kakaoAuthUrl;
-  };
-
   // 로그인 상태일 때 진입 막음
   useAuthRedirect();
 
@@ -137,7 +127,7 @@ const SignUp = () => {
         variant='secondary'
         size='lg'
         className='w-full bg-[#FEE500] text-[#3C1E1E] border-none hover:bg-[#FEE500]/60'
-        onClick={handleKakaoSingUP}
+        onClick={() => redirectToKakaoAuth('signup')}
       >
         <Image
           src='/images/icons/icon_kakao.svg'
