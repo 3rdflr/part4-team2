@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import FormInput from '@/components/common/FormInput';
-import { validations } from '@/lib/utils/validations';
 import { useMutation } from '@tanstack/react-query';
 import { useUserStore } from '@/store/userStore';
 import { AxiosError } from 'axios';
@@ -14,34 +12,24 @@ import { login } from '../api/auth';
 import { getUserInfo } from '../api/user';
 import { errorToast, successToast } from '@/lib/utils/toastUtils';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import { AuthForm, EmailInput, PasswordInput } from '@/components/pages/auth/authInputValidations';
 
-type loginFormValues = {
+type FormValues = {
   email: string;
   password: string;
 };
 
 const Login = () => {
-  const setUser = useUserStore((state) => state.setUser);
   const router = useRouter();
+  const setUser = useUserStore((state) => state.setUser);
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setError,
-    formState: { isSubmitted, isSubmitting, isValid, errors },
-  } = useForm<loginFormValues>({
+  const methods = useForm<FormValues>({
     mode: 'onTouched',
     defaultValues: {
       email: '',
       password: '',
     },
   });
-
-  // 제출 버튼 활성화/비활성화 제어, defaultValues으로 초기 값 false 설정
-  // isFilled: 제출 버튼 활성화 제어용
-  const allFields = watch();
-  const isFilled = Object.values(allFields).every(Boolean);
 
   // 로그인 성공 시 다이랙트 설정
   // const params = new URLSearchParams(window.location.search);
@@ -94,7 +82,7 @@ const Login = () => {
 
         for (const [field, keyword] of Object.entries(fieldMap)) {
           if (data?.message.includes(keyword)) {
-            setError(field as keyof loginFormValues, {
+            methods.setError(field as keyof FormValues, {
               type: 'server',
               message: data.message,
             });
@@ -113,6 +101,14 @@ const Login = () => {
     retry: 0,
   });
 
+  // 폼 제출
+  const onSubmit = (data: FormValues) => {
+    mutation.mutate({
+      email: data.email,
+      password: data.password,
+    });
+  };
+
   const handleKakaoLogin = () => {
     const REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY!;
     const REDIRECT_URI = encodeURIComponent(process.env.NEXT_PUBLIC_KAKAO_LOGIN_REDIRECT_URI!);
@@ -121,14 +117,6 @@ const Login = () => {
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
 
     window.location.href = kakaoAuthUrl; // 카카오 로그인 페이지로 이동
-  };
-
-  // 폼 제출
-  const onSubmit = (data: loginFormValues) => {
-    mutation.mutate({
-      email: data.email,
-      password: data.password,
-    });
   };
 
   // 로그인 상태일 때 진입 막음
@@ -146,37 +134,10 @@ const Login = () => {
           router.push('/');
         }}
       />
-      <form onSubmit={handleSubmit(onSubmit)} className='w-full grid gap-1'>
-        <FormInput
-          type='text'
-          id='email'
-          label='이메일'
-          placeholder='이메일을 입력해 주세요'
-          aria-invalid={isSubmitted ? (errors.email ? 'true' : 'false') : undefined}
-          error={errors.email?.message}
-          {...register('email', validations.email)}
-        />
-
-        <FormInput
-          type='password'
-          id='password'
-          label='비밀번호'
-          placeholder='8자 이상 입력해 주세요'
-          aria-invalid={isSubmitted ? (errors.password ? 'true' : 'false') : undefined}
-          error={errors.password?.message}
-          {...register('password', validations.password)}
-        />
-
-        <Button
-          type='submit'
-          size='lg'
-          className='w-full mt-2'
-          disabled={isSubmitted ? !isValid : !isFilled}
-        >
-          {isSubmitting ? '로그인 중...' : '로그인하기'}
-        </Button>
-      </form>
-
+      <AuthForm methods={methods} onSubmit={onSubmit} submitLabel='로그인'>
+        <EmailInput />
+        <PasswordInput />
+      </AuthForm>
       <div className='flex my-[30px] w-full items-center'>
         <hr className='w-full flex-grow' />
         <span className='mx-4 text-[16px] text-[var(--grayscale-700)] text-center whitespace-nowrap cursor-default'>

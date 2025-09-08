@@ -2,16 +2,21 @@
 
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import FormInput from '@/components/common/FormInput';
-import { validations } from '@/lib/utils/validations';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { signup } from '../api/user';
 import { AxiosError } from 'axios';
-import { useEffect } from 'react';
 import { errorToast, successToast } from '@/lib/utils/toastUtils';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import {
+  AuthForm,
+  EmailInput,
+  NicknameInput,
+  PasswordInput,
+  ConfirmPasswordInput,
+  AgreeCheckbox,
+} from '@/components/pages/auth/authInputValidations';
 
 type FormValues = {
   email: string;
@@ -28,14 +33,7 @@ const SignUp = () => {
     router.push('/login');
   };
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setError,
-    trigger,
-    formState: { isSubmitted, isSubmitting, isValid, errors },
-  } = useForm<FormValues>({
+  const methods = useForm<FormValues>({
     mode: 'onTouched',
     defaultValues: {
       email: '',
@@ -45,23 +43,6 @@ const SignUp = () => {
       agree: false,
     },
   });
-
-  // 제출 버튼 활성화/비활성화 제어, defaultValues으로 초기 값 false 설정
-  // isFilled: 제출 버튼 활성화 제어용
-  const allFields = watch();
-  const isFilled = Object.values(allFields).every(Boolean);
-
-  // password 필드 값 구독
-  // 비밀번호 변경 시 confirmPassword 실시간 검증
-  const password = watch('password');
-
-  // 비밀번호가 바뀌면 confirmPassword 유효성 재검사
-  // 첫 제출 전에는 메시지 표시 안 함
-  useEffect(() => {
-    if (isSubmitted) {
-      trigger('confirmPassword');
-    }
-  }, [password, trigger, isSubmitted]);
 
   // 회원가입 요청 mutation
   const mutation = useMutation({
@@ -78,14 +59,13 @@ const SignUp = () => {
 
       // 리팩토링 때 훅으로 만들 예정
       const { status, data } = error.response ?? {};
-
       const emailError = data?.message.includes('이메일');
 
       let handled = false;
 
       if (status === 400 || status === 409) {
         if (emailError) {
-          setError('email', {
+          methods.setError('email', {
             type: 'server',
             message: error.response?.data.message,
           });
@@ -136,60 +116,14 @@ const SignUp = () => {
           router.push('/');
         }}
       />
-      <form onSubmit={handleSubmit(onSubmit)} className='w-full grid gap-1' noValidate>
-        <FormInput
-          type='text'
-          id='email'
-          label='이메일'
-          placeholder='이메일을 입력해 주세요'
-          aria-invalid={isSubmitted ? (errors.email ? 'true' : 'false') : undefined}
-          error={errors.email?.message}
-          {...register('email', validations.email)}
-        />
-        <FormInput
-          type='text'
-          id='nickName'
-          label='닉네임'
-          placeholder='닉네임을 입력해 주세요'
-          aria-invalid={isSubmitted ? (errors.nickname ? 'true' : 'false') : undefined}
-          error={errors.nickname?.message}
-          {...register('nickname', validations.nickname)}
-        />
-        <FormInput
-          type='password'
-          id='password'
-          label='비밀번호'
-          placeholder='8자 이상 입력해 주세요'
-          aria-invalid={isSubmitted ? (errors.password ? 'true' : 'false') : undefined}
-          error={errors.password?.message}
-          {...register('password', validations.password)}
-        />
-        <FormInput
-          type='password'
-          id='confirmPassword'
-          label='비밀번호 확인'
-          placeholder='비밀번호를 한 번 더 입력해 주세요'
-          aria-invalid={isSubmitted ? (errors.confirmPassword ? 'true' : 'false') : undefined}
-          error={errors.confirmPassword?.message}
-          {...register('confirmPassword', validations.confirmPassword(password))}
-        />
 
-        <div className='mb-2 flex items-center gap-1'>
-          <input type='checkbox' id='agree' {...register('agree', { required: true })} />
-          <label htmlFor='agree' className='text-[14px]'>
-            이용약관에 동의합니다.
-          </label>
-        </div>
-
-        <Button
-          type='submit'
-          size='lg'
-          className='w-full mt-2'
-          disabled={isSubmitted ? !isValid : !isFilled}
-        >
-          {isSubmitting ? '회원가입하기 중...' : '회원가입하기'}
-        </Button>
-      </form>
+      <AuthForm methods={methods} onSubmit={onSubmit} submitLabel='회원가입'>
+        <EmailInput />
+        <NicknameInput />
+        <PasswordInput />
+        <ConfirmPasswordInput />
+        <AgreeCheckbox />
+      </AuthForm>
 
       <div className='flex my-[30px] w-full items-center'>
         <hr className='w-full flex-grow' />
