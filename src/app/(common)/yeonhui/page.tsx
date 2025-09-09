@@ -1,26 +1,24 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+// import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import FormInput from '@/components/common/FormInput';
-
-import { validations } from '@/lib/utils/validations';
+// import FormInput from '@/components/common/FormInput';
 
 import Image from 'next/image';
 
 // button, input 공통 테스트 화면
 
-type FormValues = {
-  email: string;
-  password: string;
-};
+// type FormValues = {
+//   email: string;
+//   password: string;
+// };
 
 const Common = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting, isSubmitted, errors },
-  } = useForm<FormValues>();
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { isSubmitting, isSubmitted, errors },
+  // } = useForm<FormValues>();
 
   return (
     <>
@@ -46,7 +44,7 @@ const Common = () => {
 
       <br />
 
-      <form onSubmit={handleSubmit((data) => alert(data))}>
+      {/* <form onSubmit={handleSubmit((data) => alert(data))}>
         <div className='flex gap-2 p-1 '>
           <FormInput
             type='email'
@@ -70,7 +68,7 @@ const Common = () => {
         <Button type='submit' disabled={isSubmitting}>
           전송
         </Button>
-      </form>
+      </form> */}
     </>
   );
 };
