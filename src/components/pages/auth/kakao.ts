@@ -13,5 +13,5 @@ export const redirectToKakaoAuth = (type: kakaoAuthType) => {
 
   const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code${stateParam}`;
 
-  window.location.href = kakaoAuthUrl;
+  window.open(kakaoAuthUrl, '_blank', 'width=500,height=700');
 };

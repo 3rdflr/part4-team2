@@ -30,21 +30,37 @@ const KakaoLoginCallbackPage = () => {
       if (!code) throw new Error('카카오 인증 코드가 없습니다.');
       return await signInKakao({ token: code, redirectUri });
     },
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       const user = await getUserInfo();
-      setUser(user);
 
-      router.replace('/');
-      successToast.run(`${user.nickname}님 환영합니다!`);
+      if (window.opener) {
+        window.opener.postMessage({ type: 'KAKAO_LOGIN_SUCCESS', payload: data }, '*');
+        window.close();
+      } else {
+        setUser(user);
+        router.replace('/');
+        successToast.run(`${user.nickname}님 환영합니다!`);
+      }
     },
     onError: (err) => {
       const error = err as AxiosError<{ message: string }>;
       const status = error.response?.status;
       const errorMessage = error.response?.data?.message ?? '';
 
-      if (status === 404 || status === 403) {
-        // errorToast.run('등록되지 않은 사용자입니다. 회원가입을 먼저 해주세요.');
+      if (window.opener) {
+        // 팝업 모드 윈도우 창에서 처리
+        window.opener.postMessage(
+          {
+            type: 'KAKAO_LOGIN_ERROR',
+            payload: { status, errorMessage },
+          },
+          '*',
+        );
+        window.close();
+        return;
+      }
 
+      if (status === 404 || status === 403) {
         overlay.open(({ isOpen, close }) => (
           <ConfirmActionModal
             title={

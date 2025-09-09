@@ -9,12 +9,16 @@ import { errorToast, successToast } from '@/lib/utils/toastUtils';
 import { redirectToKakaoAuth } from '@/components/pages/auth/kakao';
 import getRandomNickname from '@/lib/utils/randomNicknameUtils';
 import Spinner from '@/components/common/Spinner';
+import { getUserInfo } from '@/app/api/user';
+import { useUserStore } from '@/store/userStore';
 
 const KakaoSignupCallbackPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
   const redirectUri = process.env.NEXT_PUBLIC_KAKAO_SIGNUP_REDIRECT_URI!;
+
+  const setUser = useUserStore((state) => state.setUser);
 
   const hasMutated = useRef(false);
 
@@ -25,10 +29,19 @@ const KakaoSignupCallbackPage = () => {
 
       return await signUpKakao({ token: code, redirectUri, nickname });
     },
-    onSuccess: async () => {
-      successToast.run('Trivera 카카오 회원가입이 완료되었습니다!');
-      redirectToKakaoAuth('login');
-      router.replace('/');
+    onSuccess: async (data) => {
+      if (window.opener) {
+        window.opener.postMessage({ type: 'KAKAO_LOGIN_SUCCESS', payload: data }, '*');
+        window.close();
+      } else {
+        redirectToKakaoAuth('login');
+
+        const user = await getUserInfo();
+        setUser(user);
+
+        router.replace('/');
+        successToast.run('Trivera 카카오 회원가입이 완료되었습니다!');
+      }
     },
     onError: (err) => {
       const error = err as AxiosError<{ message: string }>;
@@ -36,6 +49,19 @@ const KakaoSignupCallbackPage = () => {
       const errorMessage = error.response?.data?.message ?? '';
 
       errorToast.run(errorMessage);
+
+      if (window.opener) {
+        // 팝업 모드 윈도우 창에서 처리
+        window.opener.postMessage(
+          {
+            type: 'KAKAO_LOGIN_ERROR',
+            payload: { status, errorMessage },
+          },
+          '*',
+        );
+        window.close();
+        return;
+      }
 
       if ((status === 409 || status === 400) && errorMessage.includes('등록된')) {
         router.replace('/login');
