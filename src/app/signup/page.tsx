@@ -33,10 +33,6 @@ type FormValues = {
 const SignUp = () => {
   const router = useRouter();
 
-  const goToLogin = () => {
-    router.push('/login');
-  };
-
   const methods = useForm<FormValues>({
     mode: 'onTouched',
     defaultValues: {
@@ -52,16 +48,12 @@ const SignUp = () => {
   const mutation = useMutation({
     mutationFn: signup,
     mutationKey: ['signup'],
-    onSuccess: (data) => {
-      console.log('회원가입 정보', data);
-
-      goToLogin();
+    onSuccess: () => {
+      router.push('/login');
       successToast.run('회원가입이 완료되었습니다');
     },
     onError: (err: unknown) => {
       const error = err as AxiosError<{ message: string }>;
-
-      // 리팩토링 때 훅으로 만들 예정
       const { status, data } = error.response ?? {};
       const emailError = data?.message.includes('이메일');
 

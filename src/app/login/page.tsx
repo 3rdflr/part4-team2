@@ -72,8 +72,6 @@ const Login = () => {
     },
     onError: (err: unknown) => {
       const error = err as AxiosError<{ message: string }>;
-
-      // alert => 모달로 변경 예정, 리팩토링 때 훅으로 만들 예정
       const { status, data } = error.response ?? {};
 
       if (status === 400 || status === 409) {
