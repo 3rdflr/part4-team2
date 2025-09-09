@@ -2,6 +2,7 @@
 import { getMyReservationsList, updateReservation } from '@/app/api/myReservations';
 import ConfirmActionModal from '@/components/common/ConfirmActionModal';
 import ConfirmModal from '@/components/common/ConfirmModal';
+import { ReviewModal } from '@/components/pages/myActivities/ReviewModal';
 import MyExperienceCardSkeleton from '@/components/pages/myPage/MyExperienceSkeleton';
 import ReservationListCard from '@/components/pages/myPage/ReservationListCard';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ import {
   MyReservationListResponse,
   MyReservationUpdateRequest,
   MyReservationUpdateResponse,
+  Reservation,
 } from '@/types/myReservation.type';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -88,8 +90,11 @@ const ReservationListPage = () => {
     ));
   };
 
-  const onClickReview = (id: number) => {
-    console.log(`id:${id},` + '후기 작성 버튼 클릭 시 리뷰 모달 호출');
+  const onClickReview = (reservation: Reservation) => {
+    console.log(`id:${reservation.id},` + '후기 작성 버튼 클릭 시 리뷰 모달 호출');
+    overlay.open(({ isOpen, close }) => (
+      <ReviewModal data={reservation} isOpen={isOpen} onClose={close} />
+    ));
   };
 
   const ReservationEmpty = ({ text }: ReservationEmptyProps) => {

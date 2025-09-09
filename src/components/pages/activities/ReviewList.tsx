@@ -25,9 +25,10 @@ export default function ReviewList({ activityId }: ReviewListProps) {
         fetchNextPage={reviewData.fetchNextPage}
         isLoading={reviewData.isLoading}
         isFetchingNextPage={reviewData.isFetchingNextPage}
+        height={600}
         itemHeightEstimate={140}
         scrollKey={`reviews-${activityId}`}
-        className='rounded-3xl px-2'
+        className='rounded-3xl px-2 border-2'
       >
         {/* 초기 로딩 스켈레톤 */}
         <InfinityScroll.Skeleton count={3}>
@@ -46,11 +47,14 @@ export default function ReviewList({ activityId }: ReviewListProps) {
             </div>
           </div>
         </InfinityScroll.Skeleton>
-        <InfinityScroll.Contents>
+        <InfinityScroll.Contents loadingText='더 많은 후기를 불러오는 중입니다...'>
           {(review: Review, _index: number) => <ReviewCard key={review.id} review={review} />}
         </InfinityScroll.Contents>
 
-        <InfinityScroll.Empty className='flex flex-col items-center justify-center gap-3 text-gray-500'>
+        <InfinityScroll.Empty className='flex flex-col items-center justify-center gap-3 text-gray-500 bg-amber-50'>
+          <p className='text-xl'>아직 리뷰가 없습니다</p>
+          <p className='text-xl'>아직 리뷰가 없습니다</p>
+          <p className='text-xl'>아직 리뷰가 없습니다</p>
           <p className='text-xl'>아직 리뷰가 없습니다</p>
           <p className='text-sm text-gray-400'>첫 번째 리뷰를 남겨보세요!</p>
         </InfinityScroll.Empty>

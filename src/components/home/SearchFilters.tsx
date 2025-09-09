@@ -41,6 +41,15 @@ export default function SearchFilters({ scrollY, isSearching, setIsSearching }: 
   const [keyword, setKeyword] = useState('');
   const [isShrunk, setIsShrunk] = useState(false);
 
+  // 검색어 접미사 제거
+  const normalize = (s: string) => {
+    if (!s) return '';
+    return s
+      .replace(/(특별자치도|특별자치시|광역시|특별|도|시)$/g, '')
+      .trim()
+      .toLowerCase();
+  };
+
   // --------------------
   // Refs
   // --------------------
@@ -111,7 +120,7 @@ export default function SearchFilters({ scrollY, isSearching, setIsSearching }: 
     if (keyword) params.append('keyword', keyword);
 
     router.push(`/?${params.toString()}`);
-    setOpenedSection('');
+
     setIsSearching(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     animate(height, rawHeight.get(), { type: 'spring', stiffness: 300, damping: 35 });
@@ -256,10 +265,21 @@ export default function SearchFilters({ scrollY, isSearching, setIsSearching }: 
                   onChange={(e) => {
                     const val = e.target.value;
                     setPlaceInput(val);
+
+                    setPlace(val);
+
+                    const normalizedVal = normalize(val);
                     setFilteredPlaces(
-                      PLACES.filter((p) => p.name.toLowerCase().includes(val.toLowerCase())),
+                      PLACES.filter((p) => {
+                        const normalizedName = normalize(p.name);
+                        return (
+                          normalizedName.includes(normalizedVal) ||
+                          p.name.toLowerCase().includes(val.toLowerCase())
+                        );
+                      }),
                     );
-                    setOpenedSection('place');
+
+                    if (openedSection !== 'place') setOpenedSection('place');
                   }}
                   placeholder='여행지 검색'
                   className='bg-transparent text-12-medium text-title focus:outline-none placeholder:text-14-regular placeholder:text-subtitle truncate'

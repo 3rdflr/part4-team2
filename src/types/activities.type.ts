@@ -41,6 +41,9 @@ export interface AvailableSchedule {
   date: string;
   times: ScheduleTime[];
 }
+export interface SchedulesByDate {
+  [date: string]: ScheduleTime[];
+}
 
 // 🎯 캐시 가능한 기본 체험 정보 (정적 콘텐츠)
 export interface ActivityBasicInfo {

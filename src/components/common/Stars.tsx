@@ -40,7 +40,7 @@ export function Stars({
   const sizeClasses = {
     sm: 'text-sm',
     md: 'text-base',
-    lg: 'text-lg',
+    lg: 'text-4xl',
   };
 
   // 별 클릭 핸들러

@@ -101,6 +101,36 @@
   --badge-blue-dark: #0085ff;
   --badge-green-light: #e1f9dd;
   --badge-green-dark: #37ae00;
+
+  --visible-items: 1;
+}
+
+@media (min-width: 768px) {
+  /* md */
+  :root {
+    --visible-items: 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* lg */
+  :root {
+    --visible-items: 3;
+  }
+}
+
+@media (min-width: 1280px) {
+  /* xl */
+  :root {
+    --visible-items: 4;
+  }
+}
+
+@media (min-width: 1536px) {
+  /* 2xl */
+  :root {
+    --visible-items: 5;
+  }
 }
 
 @theme inline {
@@ -293,8 +323,6 @@
   }
 
   .rdp-day_button {
-    width: 30px;
-    height: 30px;
     border-radius: 50%;
     display: inline-flex;
     justify-content: center;
@@ -332,4 +360,13 @@ input[aria-invalid='true']:focus:-webkit-autofill {
   -webkit-box-shadow:
     inset 0 0 0 30px #fde6e7,
     0 0 0 3px rgba(249, 127, 180, 0.3);
+}
+
+/* Drawer z-index override for Naver Maps */
+[data-vaul-drawer] {
+  z-index: 200 !important;
+}
+
+[data-vaul-overlay] {
+  z-index: 199 !important;
 }

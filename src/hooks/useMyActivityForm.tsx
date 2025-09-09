@@ -72,7 +72,7 @@ const useMyActivityForm = ({ mode = 'REGISTER', activityId }: useMyActivityForm)
     isLoading: isDetailLoading,
     isFetching: isDetailFetching,
   } = useQuery({
-    queryKey: activityQueryKeys.detail(activityId!),
+    queryKey: activityQueryKeys.detail(Number(activityId)),
     queryFn: () => getActivityDetail(Number(activityId)),
     enabled: !!activityId,
     refetchOnMount: 'always',

@@ -14,10 +14,14 @@ export const PLACES = [
     name: '인천',
     description: '국제공항과 항구로 유명한 도시',
   },
-  { src: '/images/icons/City_blue.png', name: '세종', description: '행정 중심의 계획 도시' },
+  {
+    src: '/images/icons/City_blue.png',
+    name: '세종특별자치시',
+    description: '행정 중심의 계획 도시',
+  },
   {
     src: '/images/icons/Mountain.png',
-    name: '강원도',
+    name: '강원특별자치도',
     description: '산과 바다, 자연 풍경이 아름다운 지역',
   },
   {
@@ -37,7 +41,7 @@ export const PLACES = [
   },
   {
     src: '/images/icons/City_green.png',
-    name: '전라북도',
+    name: '전북특별자치도',
     description: '농촌과 문화 유산이 풍부한 지역',
   },
   {
@@ -67,7 +71,7 @@ export const PLACES = [
     name: '부산',
     description: '해운대와 항구로 유명한 남부 대도시',
   },
-  { src: '/images/icons/Jeju.png', name: '제주도', description: '해변으로 인기있는 곳' },
+  { src: '/images/icons/Jeju.png', name: '제주특별자치도', description: '해변으로 인기있는 곳' },
 ];
 
 export const Categories = [

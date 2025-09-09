@@ -1,143 +1,104 @@
 'use client';
-
-import { Button } from '@/components/ui/button';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
+import { useState } from 'react';
 import BookingCalendar from './BookingCalendar';
-import BookingDetail from './BookingDetail';
-import { parseISO } from 'date-fns';
-import { AvailableSchedule } from '@/types/activities.type';
-
-interface BookingCardMobileProps {
-  activityTitle: string;
-  price: number;
-  availableSchedules?: AvailableSchedule[];
-  selectedDate?: Date;
-  selectedScheduleId?: number;
-  headCount: number;
-  onDateSelect: (date: Date | undefined) => void;
-  onTimeSlotSelect: (scheduleId: number) => void;
-  onHeadCountChange: (count: number) => void;
-  onBooking: () => void;
-}
+import BookingTimeList from './BookingTimeList';
+import BookingMember from './BookingMember';
+import clsx from 'clsx';
+import { format } from 'date-fns';
+import { filterAvailableScheduleTimes } from '@/lib/utils/schedule.utils';
+import { BookingCardProps } from './BookingContainer';
+import { Button } from '@/components/ui/button';
+import { useScreenSize } from '@/hooks/useScreenSize';
+import { ArrowLeft } from 'lucide-react';
 
 export default function BookingCardMobile({
-  activityTitle,
-  price,
-  availableSchedules,
+  schedulesByDate,
   selectedDate,
   selectedScheduleId,
-  headCount,
+  memberCount,
   onDateSelect,
   onTimeSlotSelect,
-  onHeadCountChange,
-  onBooking,
-}: BookingCardMobileProps) {
-  // Get time slots for selected date
-  const selectedDateSlots = selectedDate
-    ? availableSchedules?.find(
-        (schedule) => parseISO(schedule.date).toDateString() === selectedDate.toDateString(),
-      )?.times || []
-    : [];
+  onMemberCountChange,
+  onClose,
+}: BookingCardProps) {
+  const selectedSchedule = selectedDate
+    ? filterAvailableScheduleTimes(
+        schedulesByDate[format(selectedDate, 'yyyy-MM-dd')],
+        selectedDate,
+      )
+    : undefined;
 
-  const getSelectedTimeSlot = () => {
-    if (!selectedScheduleId) return null;
-    return selectedDateSlots.find((slot) => slot.id === selectedScheduleId);
+  const { isMobile, isTablet } = useScreenSize();
+  const [checkSchedule, setCheckSchedule] = useState<boolean>(false);
+  const buttonText = () => {
+    if (!selectedDate) return '날짜 선택';
+    else if (!selectedScheduleId) return '시간 선택';
+    else if (isMobile && !checkSchedule) return '인원 선택';
+    else return '확인';
   };
-
-  const formatDate = (date: Date) => {
-    return date
-      .toLocaleDateString('ko-KR', {
-        year: '2-digit',
-        month: '2-digit',
-        day: '2-digit',
-      })
-      .replace(/\. /g, '/')
-      .replace('.', '');
-  };
-
-  const totalPrice = price * headCount;
-  const selectedTimeSlot = getSelectedTimeSlot();
-
-  const BookingSection = () => {
-    if (!selectedScheduleId) return null;
-
-    return (
-      <>
-        <div className='border-t pt-4 mb-4'>
-          <div className='flex items-center justify-between text-lg font-bold'>
-            <span>총 합계</span>
-            <span className='text-blue-600'>₩{totalPrice.toLocaleString()}</span>
-          </div>
-        </div>
-
-        <Button
-          onClick={onBooking}
-          className='w-full bg-blue-600 text-white py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors'
-        >
-          지금 예약하기
-        </Button>
-      </>
-    );
+  const handleSubmit = () => {
+    if (isMobile && !checkSchedule) {
+      setCheckSchedule(true);
+    } else {
+      // 드롭다운 닫기
+      onClose?.();
+    }
   };
 
   return (
-    <div className='fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50 p-4'>
-      <div className='flex items-center justify-between mb-3'>
-        <div className='flex items-center gap-2'>
-          <span className='text-lg font-bold text-blue-600'>₩{price.toLocaleString()}</span>
-          <span className='text-sm text-gray-500'>/ 인</span>
-        </div>
-      </div>
+    <div className={clsx('bg-white  rounded-3xl p-6 md:p-[30px]', 'flex flex-col gap-6 z-[400]')}>
+      {(isTablet || !checkSchedule) && (
+        <div className='flex flex-col md:flex-row items-center justify-between gap-6 w-full'>
+          <BookingCalendar
+            schedulesByDate={schedulesByDate}
+            selectedDate={selectedDate}
+            onDateSelect={onDateSelect}
+          />
 
-      <div className='flex items-center justify-between mb-3'>
-        <div className='text-sm text-gray-600'>
-          {selectedDate && selectedTimeSlot
-            ? `${formatDate(selectedDate)} ${selectedTimeSlot.startTime}-${selectedTimeSlot.endTime}`
-            : '예약 가능한 시간'}
-        </div>
-      </div>
-
-      <Drawer>
-        <DrawerTrigger asChild>
-          <Button className='w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors'>
-            예약하기
-          </Button>
-        </DrawerTrigger>
-
-        <DrawerContent className='max-h-[80vh]'>
-          <DrawerHeader>
-            <DrawerTitle>{activityTitle} 예약</DrawerTitle>
-          </DrawerHeader>
-
-          <div className='px-6 pb-6 overflow-y-auto'>
-            {/* Calendar */}
-            <BookingCalendar
-              availableSchedules={availableSchedules}
-              selectedDate={selectedDate}
-              onDateSelect={onDateSelect}
-            />
-
-            {/* Booking Details */}
-            <BookingDetail
-              selectedDate={selectedDate}
-              selectedScheduleId={selectedScheduleId}
-              headCount={headCount}
-              availableSchedules={availableSchedules}
-              onTimeSlotSelect={onTimeSlotSelect}
-              onHeadCountChange={onHeadCountChange}
-            />
-
-            {/* Total Price & Booking Button */}
-            <BookingSection />
+          <div className='w-full md:h-[350px]'>
+            <div className='w-full h-full flex flex-col items-center justify-start gap-4 shadow-none md:shadow-sm md:px-6 md:py-7 rounded-3xl'>
+              <BookingTimeList
+                selectedDate={selectedDate}
+                selectedScheduleId={selectedScheduleId}
+                selectedSchedule={selectedSchedule}
+                onTimeSlotSelect={onTimeSlotSelect}
+                className='flex-1 w-full h-full'
+              />
+              <BookingMember
+                memberCount={memberCount}
+                onMemberCountChange={onMemberCountChange}
+                className='hidden md:flex'
+              />
+            </div>
           </div>
-        </DrawerContent>
-      </Drawer>
+        </div>
+      )}
+      {isMobile && checkSchedule && (
+        <div className='w-full flex flex-col items-start gap-2'>
+          <div className='flex items-center gap-2'>
+            <ArrowLeft
+              size={20}
+              className='cursor-pointer'
+              onClick={() => setCheckSchedule(false)}
+            />
+            <span className='text-lg font-bold'>인원</span>
+          </div>
+          <p className='text-sm text-gray-500 '>예약할 인원을 선택해주세요.</p>
+          <BookingMember
+            memberCount={memberCount}
+            onMemberCountChange={onMemberCountChange}
+            className='md:hidden'
+          />
+        </div>
+      )}
+      <Button
+        className='w-full'
+        variant='primary'
+        disabled={!selectedScheduleId}
+        onClick={handleSubmit}
+      >
+        {buttonText()}
+      </Button>
     </div>
   );
 }

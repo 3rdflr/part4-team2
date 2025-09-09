@@ -147,12 +147,13 @@ function InfinityScrollRoot<T>({
     virtualizer,
     virtualItems,
   };
+  console.log('virTotalSize', virtualizer.getTotalSize());
 
   return (
     <InfinityScrollContext.Provider value={contextValue}>
       <div
         ref={parentRef}
-        className={cn('infinity-scroll-container w-full', className)}
+        className={cn('infinity-scroll-container w-full border-1 border-amber-300', className)}
         style={{
           height: `${height}px`,
           overflow: 'auto',
@@ -164,7 +165,7 @@ function InfinityScrollRoot<T>({
             width: '100%',
             position: 'relative',
           }}
-          className='infinity-scroll'
+          className='infinity-scroll border-2 border-amber-700'
         >
           {children}
         </div>
@@ -239,7 +240,7 @@ function InfinityScrollEmpty({ children, className }: InfinityScrollEmptyProps) 
   const { displayItems, isLoading } = useInfinityScrollContext();
   if (isLoading || displayItems.length > 0) return null;
   return (
-    <div className={cn('absolute inset-0 flex items-center justify-center', className)}>
+    <div className={cn('absolute inset-0 flex items-center justify-center bg-amber-50', className)}>
       {children}
     </div>
   );
@@ -251,7 +252,7 @@ function InfinityScrollSkeleton({ children, className, count = 3 }: InfinityScro
   if (!isLoading || !children) return null;
 
   return (
-    <div className={cn('absolute inset-0 flex flex-col gap-4', className)}>
+    <div className={cn('absolute top-1 left-0 right-0 flex flex-col gap-4', className)}>
       {Array.from({ length: count }, (_, index) => (
         <div key={`skeleton-${index}`}>{children}</div>
       ))}

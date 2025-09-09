@@ -99,14 +99,14 @@ export async function prefetchActivityData(activityId: string): Promise<Dehydrat
  */
 export const activityQueryKeys = {
   // 기본 정보 (캐시됨)
-  detail: (activityId: string) => ['activity-detail', activityId] as const,
+  detail: (activityId: number) => ['activity-detail', activityId] as const,
 
   // 실시간 가격 (캐시 안됨)
-  price: (activityId: string) => ['activity-price', activityId] as const,
+  price: (activityId: number) => ['activity-price', activityId] as const,
 
   // 실시간 스케줄 (짧은 캐시)
-  schedule: (activityId: string) => ['activity-schedule', activityId] as const,
+  schedule: (activityId: number) => ['activity-schedule', activityId] as const,
 
   // 실시간 통계
-  stats: (activityId: string) => ['activity-stats', activityId] as const,
+  stats: (activityId: number) => ['activity-stats', activityId] as const,
 } as const;

@@ -62,7 +62,7 @@ export default function ActivityCard({
       <div className='p-[8px] gap-[6px] flex flex-col'>
         {/* 제목 */}
         <header>
-          <h2 className='leading-[1.4] text-sm font-semibold text-gray-800 line-clamp-2'>
+          <h2 className='leading-[1.4] text-sm font-semibold text-gray-800 w-auto flex-nowrap line-clamp-1 scrollbar-hide'>
             {activity.title || '새로운 체험'}
           </h2>
         </header>

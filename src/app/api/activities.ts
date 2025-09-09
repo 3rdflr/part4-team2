@@ -195,8 +195,14 @@ export const createReservation = async (
 ): Promise<ReservationResponse> => {
   console.log('🔗 createReservation API 호출:', { activityId, data });
 
-  const response = await axiosInstance.post(`/activities/${activityId}/reservations`, data);
-  return response.data;
+  try {
+    const response = await axiosInstance.post(`/activities/${activityId}/reservations`, data);
+    return response.data;
+  } catch (error) {
+    console.log('🚨 createReservation 에러 캐치:', error);
+    // 에러를 다시 throw하여 React Query가 처리할 수 있도록 함
+    throw error;
+  }
 };
 
 /**

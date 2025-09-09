@@ -1,39 +1,49 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Users } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
+import { Plus, Minus } from 'lucide-react';
 
 interface BookingMemberProps {
-  headCount: number;
-  onHeadCountChange: (count: number) => void;
-  showTitle?: boolean;
+  className?: string;
+  memberCount: number;
+  onMemberCountChange: (count: number) => void;
 }
 
 export default function BookingMember({
-  headCount,
-  onHeadCountChange,
-  showTitle = true,
+  memberCount,
+  onMemberCountChange,
+  className,
 }: BookingMemberProps) {
   return (
-    <div className='mb-6'>
-      {showTitle && (
-        <div className='text-sm font-medium mb-3 flex items-center gap-2'>
-          <Users className='w-4 h-4' />
-          참여 인원
-        </div>
+    <div
+      className={twMerge(
+        'w-full flex justify-between items-center gap-5',
+        'flex-row md:flex-col lg:flex-row',
+        'md:gap-5 md:items-start lg:items-center',
+        className,
       )}
-      <div className='flex items-center gap-3'>
+    >
+      <h3 className='font-bold'>참여 인원 수</h3>
+
+      <div className='max-w-[140px] md:max-w-none lg:max-w-[140px] w-full flex items-center justify-between border border-gray-100 rounded-3xl'>
         <Button
-          variant='secondary'
+          variant='ghost'
           size='sm'
-          onClick={() => onHeadCountChange(Math.max(1, headCount - 1))}
-          disabled={headCount <= 1}
+          className='disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 rounded-full size-10'
+          onClick={() => onMemberCountChange(Math.max(1, memberCount - 1))}
+          disabled={memberCount <= 1}
         >
-          -
+          <Minus className='w-5 h-5' />
         </Button>
-        <span className='font-medium text-lg px-4'>{headCount}</span>
-        <Button variant='secondary' size='sm' onClick={() => onHeadCountChange(headCount + 1)}>
-          +
+        <span className='font-bold'>{memberCount}</span>
+        <Button
+          className='rounded-full size-10'
+          variant='ghost'
+          size='sm'
+          onClick={() => onMemberCountChange(memberCount + 1)}
+        >
+          <Plus className='w-5 h-5' />
         </Button>
       </div>
     </div>

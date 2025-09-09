@@ -1,51 +1,30 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Clock } from 'lucide-react';
-
-interface TimeSlot {
-  id: number;
-  startTime: string;
-  endTime: string;
-}
+import { ScheduleTime } from '@/types/activities.type';
+import clsx from 'clsx';
 
 interface BookingTimeSlotProps {
-  timeSlots: TimeSlot[];
+  scheduleTime: ScheduleTime;
   selectedScheduleId?: number;
-  onTimeSlotSelect: (scheduleId: number) => void;
-  showTitle?: boolean;
+  onTimeSlotSelect: (scheduleTime: ScheduleTime) => void;
 }
 
 export default function BookingTimeSlot({
-  timeSlots,
+  scheduleTime,
   selectedScheduleId,
   onTimeSlotSelect,
-  showTitle = true,
 }: BookingTimeSlotProps) {
-  if (timeSlots.length === 0) {
-    return null;
-  }
-
   return (
-    <div className='mb-6'>
-      {showTitle && (
-        <div className='text-sm font-medium mb-3 flex items-center gap-2'>
-          <Clock className='w-4 h-4' />
-          예약 시간
-        </div>
+    <Button
+      variant={selectedScheduleId === scheduleTime.id ? 'primary' : 'secondary'}
+      onClick={() => onTimeSlotSelect(scheduleTime)}
+      className={clsx(
+        'w-full text-sm',
+        selectedScheduleId === scheduleTime.id ? ' bg-primary-300 hover:bg-primary-200' : '',
       )}
-      <div className='grid grid-cols-1 gap-2'>
-        {timeSlots.map((slot) => (
-          <Button
-            key={slot.id}
-            variant={selectedScheduleId === slot.id ? 'primary' : 'secondary'}
-            onClick={() => onTimeSlotSelect(slot.id)}
-            className='justify-start text-sm py-2'
-          >
-            {slot.startTime} - {slot.endTime}
-          </Button>
-        ))}
-      </div>
-    </div>
+    >
+      {scheduleTime.startTime} - {scheduleTime.endTime}
+    </Button>
   );
 }

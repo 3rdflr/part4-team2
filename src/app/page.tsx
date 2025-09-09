@@ -1,6 +1,7 @@
 import { Activity, ActivitiesCategoryType } from '../types/activities.type';
 import { getActivitiesList } from '@/app/api/activities';
 import ActivityList from '@/components/home/ActivityList';
+import BestActivity from '@/components/home/BestActityList';
 import SearchResult from '@/components/home/SearchResult';
 
 export default async function Home({
@@ -51,6 +52,7 @@ export default async function Home({
 
   return (
     <div className='h-auto min-h-screen'>
+      {!hasParams && <BestActivity />}
       {!hasParams ? (
         <ActivityList initialActivities={activities} initalCursorId={activitiesData.cursorId} />
       ) : (

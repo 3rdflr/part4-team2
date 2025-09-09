@@ -43,7 +43,7 @@ const ActivityPage = async ({ params }: ActivityPageProps) => {
   return (
     <HydrationBoundary state={dehydratedState}>
       <Suspense fallback={<ActivitySkeleton />}>
-        <ActivityClient activityId={activityId} />
+        <ActivityClient activityId={Number(activityId)} />
       </Suspense>
     </HydrationBoundary>
   );
