@@ -22,6 +22,7 @@ const MyExperiencePage = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['my-activities-list'],
     queryFn: () => getMyActivitiesList({}),
+    refetchOnMount: 'always',
   });
 
   const onClickEdit = (id: number) => {

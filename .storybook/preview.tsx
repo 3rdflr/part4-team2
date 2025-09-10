@@ -1,6 +1,6 @@
 import type { Preview } from '@storybook/react';
 import React from 'react';
-import { OverlayProvider } from '../src/components/common/OverlayProvider';
+import { OverlayProvider } from '../src/providers/OverlayProvider';
 import '../src/app/globals.css';
 
 const preview: Preview = {

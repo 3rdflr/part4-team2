@@ -30,22 +30,21 @@ const ReservationStatusPage = () => {
   });
 
   const { data: reservationListData, isLoading: isReservationListLoading } = useQuery({
-    queryKey: [
-      'reservation-list',
-      activityId,
-      currentDate ? format(currentDate, 'yyyy-MM-dd') : null,
-    ],
+    queryKey:
+      activityId && currentDate
+        ? ['reservation-list', activityId, format(currentDate, 'yyyy-MM-dd')]
+        : ['reservation-list', 'empty'],
     queryFn: ({ queryKey }) => {
-      const [_key, activityId, date] = queryKey as [string, string, string];
+      const [_key, id, date] = queryKey as [string, string, string];
 
-      if (!activityId || !date) return Promise.resolve(null);
+      if (id === 'empty') return Promise.resolve(null);
 
       const year = format(date, 'yyyy');
       const month = format(date, 'MM');
 
-      return getReservationDashboard(Number(activityId), { year, month });
+      return getReservationDashboard(Number(id), { year, month });
     },
-    enabled: activityId !== null && currentDate !== null,
+    enabled: !!activityId && !!currentDate,
     staleTime: 0,
     refetchOnMount: 'always',
   });

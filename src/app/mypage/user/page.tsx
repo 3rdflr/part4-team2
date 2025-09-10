@@ -33,6 +33,7 @@ const UserPage = () => {
   const { data: userData, isLoading } = useQuery({
     queryKey: ['user'],
     queryFn: getUserInfo,
+    refetchOnMount: 'always',
   });
 
   const updateUserMutation = useMutation<

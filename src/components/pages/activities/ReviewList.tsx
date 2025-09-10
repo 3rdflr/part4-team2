@@ -28,13 +28,12 @@ export default function ReviewList({ activityId }: ReviewListProps) {
         height={600}
         itemHeightEstimate={140}
         scrollKey={`reviews-${activityId}`}
-        className='rounded-3xl px-2 border-2'
+        className='rounded-3xl p-1'
       >
         {/* 초기 로딩 스켈레톤 */}
         <InfinityScroll.Skeleton count={3}>
-          <div className='animate-pulse bg-white rounded-lg p-4 shadow-sm mx-4'>
+          <div className='animate-pulse bg-white rounded-3xl p-4 shadow-sm mx-4'>
             <div className='flex items-center space-x-4 mb-3'>
-              <div className='rounded-full bg-gray-200 h-10 w-10'></div>
               <div className='flex-1 space-y-2'>
                 <div className='h-4 bg-gray-200 rounded w-1/4'></div>
                 <div className='h-3 bg-gray-200 rounded w-20'></div>
@@ -51,12 +50,10 @@ export default function ReviewList({ activityId }: ReviewListProps) {
           {(review: Review, _index: number) => <ReviewCard key={review.id} review={review} />}
         </InfinityScroll.Contents>
 
-        <InfinityScroll.Empty className='flex flex-col items-center justify-center gap-3 text-gray-500 bg-amber-50'>
-          <p className='text-xl'>아직 리뷰가 없습니다</p>
-          <p className='text-xl'>아직 리뷰가 없습니다</p>
-          <p className='text-xl'>아직 리뷰가 없습니다</p>
-          <p className='text-xl'>아직 리뷰가 없습니다</p>
-          <p className='text-sm text-gray-400'>첫 번째 리뷰를 남겨보세요!</p>
+        <InfinityScroll.Empty className='flex flex-col items-center justify-center gap-3 text-gray-500'>
+          <p className='text-xl'>아직 후기가 없어요..</p>
+
+          <p className='text-sm text-gray-400'>새로운 경험들을 공유해주세요!</p>
         </InfinityScroll.Empty>
       </InfinityScroll>
     </div>

@@ -42,6 +42,7 @@ const ReservationListPage = () => {
       getMyReservationsList({
         status: selectedStatus === 'all' ? undefined : selectedStatus,
       }),
+    refetchOnMount: 'always',
   });
 
   const updateReservationMutation = useMutation<
