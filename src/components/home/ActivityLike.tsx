@@ -31,7 +31,7 @@ export default function ActivityLike({
     <button
       onClick={() => toggleFavorite(activity)}
       aria-label={isLiked ? '찜 해제하기' : '찜하기'}
-      className={`absolute top-[12px] right-[16px] w-[32px] h-[32px] flex justify-center items-center text-white cursor-pointer ${isButton ? 'bg-gray-200 rounded-full' : ''}`}
+      className={`absolute top-[12px] right-[16px] flex justify-center items-center text-white cursor-pointer ${isButton ? 'bg-gray-200 rounded-full w-full h-full' : 'w-[32px] h-[32px]'}`}
     >
       <Heart
         size={size}

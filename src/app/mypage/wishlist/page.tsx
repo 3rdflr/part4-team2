@@ -1,16 +1,35 @@
 'use client';
+
+import { useState, useEffect } from 'react';
 import { useUserStore } from '@/store/userStore';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { useFavoritesStore } from '@/store/likeStore';
 import Image from 'next/image';
 import Link from 'next/link';
+import Spinner from '@/components/common/Spinner';
 import ActivityLike from '@/components/home/ActivityLike';
 
 export default function WishList() {
+  const [isLoading, setIsLoading] = useState(true);
   const { isMobile } = useScreenSize();
 
   const user = useUserStore((state) => state.user);
-  const favorites = useFavoritesStore((state) => state.favorites);
+  const { favorites, initializeUser } = useFavoritesStore();
+
+  useEffect(() => {
+    if (user) {
+      initializeUser(user.id);
+    }
+    setIsLoading(false);
+  }, [user, initializeUser]);
+
+  if (isLoading) {
+    return (
+      <div className='flex justify-center items-center h-80'>
+        <Spinner />
+      </div>
+    );
+  }
 
   if (!user || favorites.length === 0) {
     return (
@@ -30,10 +49,7 @@ export default function WishList() {
           {favorites.map((activity) => (
             <div key={activity.id}>
               {isMobile ? (
-                <div className='group block w-[327px] h-auto rounded-2xl overflow-hidden shadow-lg bg-white transition-transform hover:scale-105'>
-                  <div className='absolute right-5 z-[100] w-8 h-8 flex items-center justify-center rounded-full transition size-2'>
-                    <ActivityLike activity={activity} userId={user.id} size={32} />
-                  </div>
+                <div className='group relative flex flex-col w-[327px] h-auto rounded-2xl overflow-hidden shadow-lg bg-white transition-transform hover:scale-105'>
                   <Link href={`/activities/${activity.id}`}>
                     <div className='w-full h-[200px] relative'>
                       <Image
@@ -53,6 +69,10 @@ export default function WishList() {
                     <span className='text-14-bold text-title'>
                       {activity.price?.toLocaleString()}원
                     </span>
+                  </div>
+
+                  <div className='abolute top-0 right-0 z-[100] w-6 h-6 flex items-center justify-center rounded-full'>
+                    <ActivityLike activity={activity} userId={user.id} size={32} />
                   </div>
                 </div>
               ) : (

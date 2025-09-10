@@ -66,9 +66,11 @@ export default function BottomNav() {
 
   const activities = pathname.startsWith('/activities');
 
+  const withOutNav = pathname.startsWith('/login') || pathname.startsWith('/signup');
+
   if (!isMobile) return null;
 
-  if (activities) return null;
+  if (activities || withOutNav) return null;
 
   return (
     <>
@@ -98,16 +100,15 @@ export default function BottomNav() {
               <span>위시리스트</span>
             </Link>
             <button
-              className='text-grayscale-500 dark:text-grayscale-400 flex flex-col items-center justify-center gap-1'
+              className='relative text-grayscale-500 dark:text-grayscale-400 flex flex-col items-center justify-center gap-1'
               onClick={() => setIsModalOpen(true)}
             >
               <Bell strokeWidth={1} width={20} height={20} />
               <span>알림</span>
               {notificationData?.totalCount && notificationData?.totalCount > 0 ? (
-                <span className='absolute top-4.5 right-34.5 block w-1 h-1 bg-primary-500 rounded-full animate-ping'></span>
+                <span className='absolute top-0 left-3.5 block w-1 h-1 bg-primary-500 rounded-full animate-ping'></span>
               ) : null}
             </button>
-
             <Link
               className={`${
                 pathname.startsWith('/mypage') && pathname !== '/mypage/wishlist'
@@ -116,23 +117,18 @@ export default function BottomNav() {
               } flex flex-col items-center justify-center gap-1`}
               href='/mypage'
             >
-              <div className='w-[30px] h-[30px] rounded-full overflow-hidden'>
-                <Image
-                  src={
-                    user.profileImageUrl
-                      ? user.profileImageUrl
-                      : '/images/icons/default_profile.svg'
-                  }
-                  alt='Profile'
-                  width={20}
-                  height={20}
-                />
-              </div>
+              <Image
+                src={
+                  user.profileImageUrl ? user.profileImageUrl : '/images/icons/default_profile.svg'
+                }
+                alt='Profile'
+                width={20}
+                height={20}
+                className='w-[20px] h-[20px] rounded-full overflow-auto'
+              />
+
               <span>프로필</span>
             </Link>
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-              <NotificationModal />
-            </Modal>
           </div>
         ) : (
           <div className='flex justify-between items-center w-full px-20 text-12-regular'>
@@ -162,6 +158,9 @@ export default function BottomNav() {
           </div>
         )}
       </motion.nav>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <NotificationModal />
+      </Modal>
     </>
   );
 }

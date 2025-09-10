@@ -14,7 +14,7 @@ export default function NotificationModal() {
 
   return (
     <>
-      <div className='lg:h-[380px] h-full overflow-y-scroll scrollbar-hide'>
+      <div className='h-[380px] min-w-[300px] overflow-y-scroll scrollbar-hide mt-5 py-5'>
         {isLoading ? (
           <div className='h-full flex items-center justify-center w-full'>
             <Spinner />
@@ -36,7 +36,7 @@ export default function NotificationModal() {
                     className='flex flex-col gap-[12px] relative bg-grayscale-25 p-5 rounded-2xl'
                   >
                     <div
-                      className={`${content.includes('승인') ? 'bg-blue-100 text-blue-200 ' : 'bg-red-100 text-red-300 '} flex items-center justify-center rounded-full px-[10px] py-[6px] w-fit h-fit`}
+                      className={`${content.includes('승인') ? 'bg-blue-200 text-blue-400 ' : 'bg-red-200 text-red-400 '} flex items-center justify-center rounded-full px-[10px] py-[6px] w-fit h-fit`}
                     >
                       <span className='leading-none text-xs font-medium'>
                         {content.includes('승인') ? '예약 승인' : '예약 거절'}
@@ -52,7 +52,7 @@ export default function NotificationModal() {
                       className='absolute top-5 right-5 cursor-pointer '
                       onClick={() => handleDeleteNotification(id)}
                     >
-                      <X />
+                      <X width={20} height={20} />
                     </button>
                   </li>
                 ),

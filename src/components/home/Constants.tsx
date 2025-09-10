@@ -6,7 +6,7 @@ export const PLACES = [
   },
   {
     src: '/images/icons/City_blue.png',
-    name: '경기도',
+    name: '경기',
     description: '서울을 둘러싼 다양한 관광지와 자연이 있는 지역',
   },
   {

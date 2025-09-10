@@ -37,9 +37,11 @@ export default async function Home({
   });
 
   // 필터링 (가격, 장소)
+  const normalizedPlace = place?.toLowerCase().trim();
+
   const activities = activitiesData.activities.filter((item: Activity) => {
     const priceOk = item.price >= minPrice && item.price <= maxPrice;
-    const placeOk = place ? item.address.includes(place) : true;
+    const placeOk = normalizedPlace ? item.address.toLowerCase().includes(normalizedPlace) : true;
     return priceOk && placeOk;
   });
 

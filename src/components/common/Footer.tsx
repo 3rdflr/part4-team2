@@ -11,7 +11,7 @@ export default function Footer() {
     return null;
   }
   return (
-    <footer className='bg-grayscale-25 w-full h-120 flex flex-col items-center justify-start text-12-regular text-subtitle text-center'>
+    <footer className='bg-grayscale-25 w-full h-120 flex flex-col items-center justify-start text-12-regular text-subtitle text-center pb-[118px]'>
       <div className='bg-white w-full h-20 rounded-b-full shadow-lg mb-30'></div>
 
       <Image

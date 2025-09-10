@@ -109,9 +109,9 @@ export default function MapCard({ activity, onClose }: MapCardProps) {
           {user && (
             <button
               type='button'
-              className='absolute top-2 right-10 z-[200] w-6 h-6 flex items-center justify-center rounded-full transition'
+              className='absolute -top-1 right-6 z-[200] w-6 h-6 flex items-center justify-center rounded-full'
             >
-              <ActivityLike activity={activity} userId={user.id} size={16} isButton />
+              <ActivityLike activity={activity} userId={user.id} size={14} isButton />
             </button>
           )}
         </div>

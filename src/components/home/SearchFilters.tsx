@@ -114,7 +114,9 @@ export default function SearchFilters({ scrollY, isSearching, setIsSearching }: 
   // 검색 실행
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (place) params.append('place', place);
+
+    const normalizedPlace = normalize(place);
+    if (normalizedPlace) params.append('place', normalizedPlace);
     if (price[0] !== 0) params.append('min-price', price[0].toString());
     if (price[1] !== 300_000) params.append('max-price', price[1].toString());
     if (keyword) params.append('keyword', keyword);
@@ -122,6 +124,7 @@ export default function SearchFilters({ scrollY, isSearching, setIsSearching }: 
     router.push(`/?${params.toString()}`);
 
     setIsSearching(false);
+    setOpenedSection('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     animate(height, rawHeight.get(), { type: 'spring', stiffness: 300, damping: 35 });
   };
@@ -272,10 +275,7 @@ export default function SearchFilters({ scrollY, isSearching, setIsSearching }: 
                     setFilteredPlaces(
                       PLACES.filter((p) => {
                         const normalizedName = normalize(p.name);
-                        return (
-                          normalizedName.includes(normalizedVal) ||
-                          p.name.toLowerCase().includes(val.toLowerCase())
-                        );
+                        return normalizedName.includes(normalizedVal);
                       }),
                     );
 

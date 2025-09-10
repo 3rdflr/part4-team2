@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Dropdown, Modal } from 'react-simplified-package';
+import { Dropdown, Modal, useDropdownContext } from 'react-simplified-package';
 import { useScreenSize } from '@/hooks/useScreenSize';
 import { useUserStore } from '@/store/userStore';
 import { logout } from '@/lib/utils/logoutUtils';
@@ -17,8 +17,6 @@ export default function LoginSection() {
   const { data: notificationData } = useNotifications();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const router = useRouter();
 
   const user = useUserStore((state) => state.user);
 
@@ -47,51 +45,8 @@ export default function LoginSection() {
               />
             </div>
           </Dropdown.Trigger>
-          <Dropdown.Menu
-            className='bg-white rounded-xl shadow-lg py-2 border-b border-gray-200'
-            style={{
-              width: '146px',
-              borderRadius: '15px',
-              borderBottom: '1px solid #e5e7eb',
-              zIndex: '999',
-              cursor: 'pointer',
-            }}
-          >
-            <button
-              onClick={() => router.push('/mypage/user')}
-              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer z-[200] hover:bg-gray-100 transition'
-            >
-              <CircleUser strokeWidth={1.5} width={20} height={20} /> 프로필
-            </button>
-
-            <button
-              onClick={() => router.push('/mypage/wishlist')}
-              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer z-[200] hover:bg-gray-100 transition'
-            >
-              <Heart strokeWidth={1.5} width={20} height={20} /> 위시리스트
-            </button>
-
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer z-[200] hover:bg-gray-100 transition'
-            >
-              <Bell strokeWidth={1.5} width={20} height={20} /> 알림
-              {notificationData?.totalCount && notificationData?.totalCount > 0 ? (
-                <span className='ml-5 bg-primary-500 text-white text-[8px] font-bold rounded-full min-w-[18px] h-[18px] flex text-center items-center justify-center px-1'>
-                  {notificationData?.totalCount}
-                </span>
-              ) : null}
-            </button>
-
-            <button
-              onClick={() => {
-                logout();
-                router.push('/');
-              }}
-              className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer z-[200] hover:bg-gray-100 transition'
-            >
-              <LogOut strokeWidth={1.5} width={20} height={20} /> 로그아웃
-            </button>
+          <Dropdown.Menu className='w-36 bg-white rounded-xl shadow-lg py-2 border-b border-gray-200 z-[999]'>
+            <DropdownMenuButtons setIsModalOpen={setIsModalOpen} />
           </Dropdown.Menu>
         </Dropdown>
         {notificationData?.totalCount && notificationData?.totalCount > 0 ? (
@@ -119,3 +74,60 @@ export default function LoginSection() {
     </>
   );
 }
+
+const DropdownMenuButtons: React.FC<{ setIsModalOpen: (v: boolean) => void }> = ({
+  setIsModalOpen,
+}) => {
+  const router = useRouter();
+
+  const { close } = useDropdownContext();
+
+  const { data: notificationData } = useNotifications();
+
+  return (
+    <>
+      <button
+        onClick={() => router.push('/mypage/user')}
+        className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer z-[200] hover:bg-gray-100 transition'
+      >
+        <CircleUser strokeWidth={1.5} width={20} height={20} /> 프로필
+      </button>
+
+      <button
+        onClick={() => {
+          router.push('/mypage/wishlist');
+          close();
+        }}
+        className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer z-[200] hover:bg-gray-100 transition'
+      >
+        <Heart strokeWidth={1.5} width={20} height={20} /> 위시리스트
+      </button>
+
+      <button
+        onClick={() => {
+          setIsModalOpen(true);
+          close();
+        }}
+        className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer z-[200] hover:bg-gray-100 transition'
+      >
+        <Bell strokeWidth={1.5} width={20} height={20} /> 알림
+        {notificationData?.totalCount && notificationData?.totalCount > 0 ? (
+          <span className='ml-5 bg-primary-500 text-white text-[8px] font-bold rounded-full min-w-[18px] h-[18px] flex text-center items-center justify-center px-1'>
+            {notificationData?.totalCount}
+          </span>
+        ) : null}
+      </button>
+
+      <button
+        onClick={() => {
+          logout();
+          router.push('/');
+          close();
+        }}
+        className='flex items-center justify-start gap-3 w-full text-start px-4 py-2 text-14-regular text-title cursor-pointer z-[200] hover:bg-gray-100 transition'
+      >
+        <LogOut strokeWidth={1.5} width={20} height={20} /> 로그아웃
+      </button>
+    </>
+  );
+};
