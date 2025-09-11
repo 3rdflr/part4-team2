@@ -65,7 +65,6 @@ const SignUp = () => {
             type: 'server',
             message: error.response?.data.message,
           });
-
           handled = true;
         }
 

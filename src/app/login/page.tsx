@@ -35,27 +35,6 @@ const Login = () => {
     },
   });
 
-  // 로그인 성공 시 다이랙트 설정
-  // const params = new URLSearchParams(window.location.search);
-  // const redirectUrl = params.get('redirect');
-  // const source = params.get('source');
-
-  // const handleLoginSuccess = () => {
-  //   console.log(source);
-  //   alert(source);
-
-  //   if (source === 'signup') {
-  //     // 회원가입 페이지를 통해 왔다면 무조건 메인 페이지로 이동
-  //     router.push('/');
-  //   } else if (redirectUrl) {
-  //     // 리다이렉트 URL이 있다면 해당 페이지로 이동
-  //     router.push(redirectUrl);
-  //   } else {
-  //     // 리다이렉트 URL이 없다면 기본 페이지(메인)로 이동
-  //     router.push('/');
-  //   }
-  // };
-
   // 로그인 요청 mutation
   const mutation = useMutation({
     mutationFn: login,
@@ -64,11 +43,15 @@ const Login = () => {
       const user = await getUserInfo();
       setUser(user);
 
-      router.push('/');
+      setTimeout(() => {
+        const redirectUrl = sessionStorage.getItem('redirectUrl');
+        if (redirectUrl) {
+          sessionStorage.removeItem('redirectUrl');
+          router.replace(redirectUrl);
+        }
 
-      // handleLoginSuccess();
-
-      successToast.run(`${user.nickname}님 환영합니다!`);
+        successToast.run(`${user.nickname}님 환영합니다!`);
+      }, 0);
     },
     onError: (err: unknown) => {
       const error = err as AxiosError<{ message: string }>;

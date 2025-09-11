@@ -11,6 +11,7 @@ import { useNotifications } from '@/hooks/useNotification';
 import Link from 'next/link';
 import Image from 'next/image';
 import NotificationModal from './NotificationModal';
+import { useSaveCurrentUrl } from '@/lib/utils/useSaveCurrentUrl';
 
 export default function LoginSection() {
   const { isDesktop } = useScreenSize();
@@ -19,6 +20,8 @@ export default function LoginSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const user = useUserStore((state) => state.user);
+
+  const saveCurrentUrl = useSaveCurrentUrl();
 
   if (user) {
     return (
@@ -62,13 +65,14 @@ export default function LoginSection() {
     <>
       {isDesktop && (
         <Link
+          onClick={saveCurrentUrl}
           href='/login'
           className='px-4 py-2 hover:border rounded-full hover:bg-grayscale-50 transition-soft text-14-regular text-title'
         >
           로그인 하기
         </Link>
       )}
-      <Link href='/login' className='cursor-pointer'>
+      <Link onClick={saveCurrentUrl} href='/login' className='cursor-pointer'>
         <Image src='/images/icons/default_profile_gray.svg' alt='Profile' width={30} height={30} />
       </Link>
     </>
