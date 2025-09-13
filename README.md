@@ -51,4 +51,3 @@ Next.js와 React를 기반으로 빠르고 직관적인 UI/UX를 제공합니다
 
 - [원본 시안](https://www.figma.com/design/KROZeaQGQncl3HalZmnRc2/%5BCCC%5DGlobalNomad?node-id=0-1&t=O9LIKszPRlqcMP4E-1)
 - [2팀 디자인 시안](https://www.figma.com/design/IS1hVmq2ybGGCa2tmEbQwS/2%ED%8C%80-%EA%B8%80%EB%A1%9C%EB%B2%8C-%EB%85%B8%EB%A7%88%EB%93%9C?node-id=35295-12328&t=BYMUGWCC6KhQd1aD-0)
-

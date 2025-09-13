@@ -46,10 +46,11 @@ const BookingConfirmModal = ({
       reservationData: ReservationRequest;
     }) => createReservation(activityId, reservationData),
 
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('🎫 [BookingConfirmModal] 예약 성공:', data);
       onClose();
       successToast.run('예약이 완료되었습니다!');
+      router.push('/mypage/reservation-list');
     },
     onError: (error: unknown) => {
       console.error('❗ [BookingConfirmModal] 예약 실패:', error);
@@ -80,13 +81,11 @@ const BookingConfirmModal = ({
         return;
       }
 
-      // 기타 에러인 경우 재시도 옵션 제공
-      //@todo: 이미 예약한경우 구체적인 에러메시지 노출
       overlay.open(({ isOpen, close }) => (
         <ConfirmActionModal
           isOpen={isOpen}
           onClose={close}
-          title='예약에 실패했습니다.'
+          title={axiosError?.response?.data?.message ?? '예약에 실패했습니다.'}
           actionText='다시 시도'
           exitText='취소'
           onAction={() => {

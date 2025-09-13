@@ -84,11 +84,11 @@ function InfinityScrollRoot<T>({
   // 컨테이너 ref
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // 스크롤 위치 저장 훅 사용
-  const { restoreScrollPosition } = useScrollPosition(scrollKey, enableScrollPosition);
+  // 스크롤 위치 저장 훅 사용 - parentRef를 스크롤 대상으로 전달
+  const { restoreScrollPosition } = useScrollPosition(scrollKey, enableScrollPosition, parentRef);
 
   useEffect(() => {
-    // 최대 아이템의 길이가 초과되면 잘라냅니다.(최적화)
+    // 최대 아이템의 길이가 초과되면 잘라냅니다.
     if (items.length > maxItems) {
       setDisplayItems(items.slice(items.length - maxItems));
     } else {

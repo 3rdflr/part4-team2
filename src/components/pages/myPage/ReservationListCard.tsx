@@ -14,7 +14,8 @@ import { toCardDate } from '@/lib/utils/dateUtils';
 import { Reservation } from '@/types/myReservation.type';
 import Image from 'next/image';
 import { useState } from 'react';
-
+import { useOverlay } from '@/hooks/useOverlay';
+import PaymentsModal from '../activities/payments/Payments.Modal';
 interface MyExperienceCardProps {
   data: Reservation;
   onCancel: (id: number) => void;
@@ -25,11 +26,18 @@ interface MyExperienceCardProps {
 const ReservationListCard = ({ data, onCancel, onReview, onGoReview }: MyExperienceCardProps) => {
   const { id, activity, status, totalPrice, headCount, date, startTime, endTime, reviewSubmitted } =
     data;
+  const overlay = useOverlay();
 
   const { bannerImageUrl, title } = activity;
   const [isError, setIsError] = useState(false);
   const baseImageUrl = '/images/icons/_empty.png';
   const image = isError ? baseImageUrl : bannerImageUrl;
+
+  const handlePayment = () => {
+    overlay.open(({ isOpen, close }) => (
+      <PaymentsModal isOpen={isOpen} onClose={close} title={title} totalPrice={totalPrice} />
+    ));
+  };
 
   return (
     <section className='flex flex-col w-full gap-3'>
@@ -76,9 +84,14 @@ const ReservationListCard = ({ data, onCancel, onReview, onGoReview }: MyExperie
                   ))}
 
                 {(status === 'pending' || status === 'confirmed') && (
-                  <Button variant='secondary' size='xs' onClick={() => onCancel(id)}>
-                    예약 취소
-                  </Button>
+                  <div className='flex gap-2'>
+                    <Button variant='secondary' size='xs' onClick={() => onCancel(id)}>
+                      예약 취소
+                    </Button>
+                    <Button onClick={handlePayment} size='xs'>
+                      결제하기
+                    </Button>
+                  </div>
                 )}
               </CardFooter>
             </div>
@@ -118,14 +131,14 @@ const ReservationListCard = ({ data, onCancel, onReview, onGoReview }: MyExperie
           ))}
 
         {(status === 'pending' || status === 'confirmed') && (
-          <Button
-            variant='secondary'
-            size='sm'
-            className='flex-1 min-w-[300px]'
-            onClick={() => onCancel(id)}
-          >
-            예약 취소
-          </Button>
+          <div className='flex-1 flex gap-3 min-w-[300px]'>
+            <Button variant='secondary' size='sm' className='flex-1 ' onClick={() => onCancel(id)}>
+              예약 취소
+            </Button>
+            <Button onClick={handlePayment} size='sm' className='flex-1'>
+              결제하기
+            </Button>
+          </div>
         )}
       </div>
     </section>

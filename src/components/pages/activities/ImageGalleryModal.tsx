@@ -305,7 +305,7 @@ export default function ImageGalleryModal({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <div className='flex gap-3 p-3 bg-gray-100 rounded-2xl border border-gray-200 overflow-x-auto max-w-full'>
+                <div className='flex gap-3 p-3 bg-gray-100 rounded-2xl border border-gray-200 overflow-x-auto max-w-full z-100'>
                   {allImages.map((image, index) => (
                     <motion.button
                       key={index}

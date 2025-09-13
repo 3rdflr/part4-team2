@@ -39,7 +39,7 @@ export default function BookingCalendar({
 
   return (
     <div className='w-full  flex flex-col items-center gap-2'>
-      <div className='w-full flex items-start font-bold'>날짜</div>
+      {/* <div className='w-full flex items-start font-bold'>날짜</div> */}
       <BasicCalendar
         mode='single'
         selected={selectedDate}
