@@ -1,13 +1,10 @@
+'use client';
+
 import { ActivityDetail } from '@/types/activities.type';
-import { MapPin, Star, EllipsisVertical } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { MapPin, Star } from 'lucide-react';
+
 import { twMerge } from 'tailwind-merge';
+import { EditDropDown } from './EditDropDown';
 
 /**
  *
@@ -18,38 +15,16 @@ import { twMerge } from 'tailwind-merge';
 interface ActivityInfoProps {
   activity: ActivityDetail;
   className?: string;
-  onEdit?: () => void;
-  onDelete?: () => void;
   isOwner: boolean;
 }
 
-export default function ActivityInfo({
-  activity,
-  className,
-  onEdit,
-  onDelete,
-  isOwner,
-}: ActivityInfoProps) {
+export default function ActivityInfo({ activity, className, isOwner }: ActivityInfoProps) {
   return (
     <div className={twMerge('flex flex-col gap-2 justify-self-start', className)}>
       {/* 카테고리 및 드롭다운 */}
       <div className='flex items-center justify-between'>
         <span className='text-sm text-gray-950'>{activity.category}</span>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='h-8 w-8 p-0 rounded-full'>
-              <EllipsisVertical className='w-8 h-8' />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='center' className='z-120'>
-            <DropdownMenuItem onClick={onEdit} disabled={!isOwner}>
-              수정하기
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete} disabled={!isOwner}>
-              삭제하기
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <EditDropDown isOwner={isOwner} activityId={activity.id} />
       </div>
       {/* 제목과 기본 정보 */}
       <div className='flex flex-col gap-4'>

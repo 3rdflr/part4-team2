@@ -2,7 +2,7 @@ import { HydrationBoundary } from '@tanstack/react-query';
 import { getActivitiesList } from '@/app/api/activities';
 import ActivityClient from '@/app/activities/[activityId]/ActivityClientPage';
 import ActivitySkeleton from '@/components/pages/activities/ActivitySkeleton';
-import { prefetchActivityData } from './queryClients';
+import { prefetchActivityData } from './prefetchActivity';
 import { Suspense } from 'react';
 
 /**
@@ -35,7 +35,7 @@ const ActivityPage = async ({ params }: ActivityPageProps) => {
   const { activityId } = await params;
 
   // Activity 데이터 prefetch
-  const dehydratedState = await prefetchActivityData(activityId);
+  const { dehydratedState, blur } = await prefetchActivityData(activityId);
 
   const duration = performance.now() - startTime;
   console.log(`⏱️ [SSR] ActivityPage 완료: ${duration.toFixed(2)}ms`, { activityId });
@@ -43,7 +43,7 @@ const ActivityPage = async ({ params }: ActivityPageProps) => {
   return (
     <HydrationBoundary state={dehydratedState}>
       <Suspense fallback={<ActivitySkeleton />}>
-        <ActivityClient activityId={Number(activityId)} />
+        <ActivityClient activityId={Number(activityId)} blurImage={blur} />
       </Suspense>
     </HydrationBoundary>
   );

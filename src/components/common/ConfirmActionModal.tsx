@@ -9,6 +9,7 @@ interface ConfirmActionModalProps {
   buttons?: React.ReactNode;
   className?: string;
   isOpen: boolean;
+  isLoading?: boolean; // 로딩 상태 추가
   onClose: () => void;
   onAction?: () => void;
 }
@@ -20,6 +21,7 @@ const ConfirmActionModal = ({
   buttons,
   className,
   isOpen,
+  isLoading = false,
   onClose,
   onAction,
 }: ConfirmActionModalProps) => {
@@ -38,10 +40,16 @@ const ConfirmActionModal = ({
             buttons
           ) : (
             <>
-              <Button size='md' variant='secondary' className={buttonClass} onClick={onClose}>
+              <Button
+                size='md'
+                variant='secondary'
+                className={buttonClass}
+                onClick={onClose}
+                disabled={isLoading}
+              >
                 {exitText}
               </Button>
-              <Button size='md' className={buttonClass} onClick={onAction}>
+              <Button size='md' className={buttonClass} onClick={onAction} disabled={isLoading}>
                 {actionText}
               </Button>
             </>

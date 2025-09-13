@@ -62,7 +62,8 @@ export function useInfiniteReviews(activityId: string, pageSize: number = 10) {
 
   // 첫 번째 페이지에서 메타데이터 추출
   const firstPage = data?.pages?.[0];
-  const averageRating = firstPage?.averageRating || 0;
+  // 로딩 중일 때는 5점을 기본값으로 표시
+  const averageRating = isLoading ? 5 : firstPage?.averageRating || 0;
   const totalCount = firstPage?.totalCount || 0;
 
   return {

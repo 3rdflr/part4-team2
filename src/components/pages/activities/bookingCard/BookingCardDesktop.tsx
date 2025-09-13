@@ -1,13 +1,13 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import BookingCalendar from './BookingCalendar';
 import BookingTimeList from './BookingTimeList';
 import BookingMember from './BookingMember';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { filterAvailableScheduleTimes } from '@/lib/utils/schedule.utils';
 import { BookingCardProps } from './BookingContainer';
+import { BookingDateInput } from './BookingDateInput';
 
 export default function BookingCardDesktop({
   price,
@@ -31,29 +31,28 @@ export default function BookingCardDesktop({
   return (
     <div
       className={clsx(
-        'bg-white border border-card-border rounded-3xl p-[20px] xl:p-[30px] shadow-sm',
+        'bg-white border border-card-border rounded-3xl p-4 shadow-sm',
         'flex flex-col gap-6',
       )}
     >
       {/* 가격 */}
       <div className='flex items-center gap-1'>
-        <span className='text-2xl font-bold'>₩{price.toLocaleString()}</span>
-        <span className='text-xl text-gray-500'> / 인</span>
+        <span className='text-xl font-bold'>₩{price.toLocaleString()}</span>
+        <span className='text-lg text-gray-500'> / 인</span>
       </div>
-
-      <BookingCalendar
-        schedulesByDate={schedulesByDate}
+      <BookingDateInput
         selectedDate={selectedDate}
         onDateSelect={onDateSelect}
+        schedulesByDate={schedulesByDate}
       />
 
-      <BookingMember memberCount={memberCount} onMemberCountChange={onMemberCountChange} />
       <BookingTimeList
         selectedDate={selectedDate}
         selectedScheduleId={selectedScheduleId}
         selectedSchedule={selectedSchedule}
         onTimeSlotSelect={onTimeSlotSelect}
       />
+      <BookingMember memberCount={memberCount} onMemberCountChange={onMemberCountChange} />
 
       {/* Total Price & Booking Button */}
       <hr className='border-t border-gray-100' />

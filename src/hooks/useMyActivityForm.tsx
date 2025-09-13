@@ -17,7 +17,7 @@ import { successToast } from '@/lib/utils/toastUtils';
 import { toApiDate } from '@/lib/utils/dateUtils';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { activityQueryKeys } from '@/app/activities/[activityId]/queryClients';
+import { activityQueryKeys } from '@/app/activities/[activityId]/queryKeys';
 import { updateActivity } from '@/app/api/myActivities';
 
 interface useMyActivityForm {
