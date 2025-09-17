@@ -168,10 +168,13 @@ export const AuthForm = <T extends FieldValues>({
   children,
   type,
 }: AuthFormProps<T>) => {
-  // 제출 버튼 활성화/비활성화 제어, defaultValues으로 초기 값 false 설정
-  // isFilled: 제출 버튼 활성화 제어용
+  // 모든 인풋이 값이 존재하면 true
   const allFields = methods.watch();
   const isFilled = Object.values(allFields).every(Boolean);
+
+  // 폼에 에러가 하나라도 있으면 true
+  const { errors } = methods.formState;
+  const hadError = Object.keys(errors).length > 0;
 
   const submitLabel = type === 'signup' ? '회원가입' : '로그인';
 
@@ -183,7 +186,7 @@ export const AuthForm = <T extends FieldValues>({
           type='submit'
           size='lg'
           className='w-full mt-2'
-          disabled={!isFilled || !methods.formState.isValid}
+          disabled={!isFilled || hadError || methods.formState.isSubmitting}
         >
           {methods.formState.isSubmitting ? `${submitLabel} 중...` : `${submitLabel}하기`}
         </Button>
